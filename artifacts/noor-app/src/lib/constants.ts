@@ -1,5 +1,5 @@
 export const ADHAN_RECITERS = [
-  { id: "madinah", name: "أذان المدينة المنورة (الشيخ علي أحمد ملا)", url: "https://www.islamicfinder.org/prayer/adhanMadinah.mp3" },
+  { id: "madinah", name: "أذان المدينة المنورة", url: "https://www.islamicfinder.org/prayer/adhanMadinah.mp3" },
   { id: "makkah", name: "أذان مكة المكرمة", url: "https://www.islamicfinder.org/prayer/adhanMakkah.mp3" },
   { id: "alafasy", name: "مشاري العفاسي", url: "https://www.islamicfinder.org/prayer/adhan/alafasy.mp3" },
   { id: "abdulbasit", name: "عبدالباسط عبدالصمد", url: "https://www.islamicfinder.org/prayer/adhan/abdulbaset.mp3" },
@@ -11,6 +11,22 @@ export const ADHAN_RECITERS = [
   { id: "husary", name: "محمود خليل الحصري", url: "https://www.islamicfinder.org/prayer/adhan/husary.mp3" },
   { id: "adel", name: "عادل ريان", url: "https://www.islamicfinder.org/prayer/adhan/adel.mp3" },
   { id: "muaiqly", name: "ماهر المعيقلي", url: "https://www.islamicfinder.org/prayer/adhan/maher.mp3" },
+];
+
+// Reciters available on everyayah.com (per-ayah audio)
+export const QURAN_RECITERS = [
+  { id: "ajamy", name: "أحمد العجمي", folder: "Ahmed_ibn_Ali_al_Ajamy_128kbps" },
+  { id: "alafasy", name: "مشاري العفاسي", folder: "Alafasy_128kbps" },
+  { id: "husary", name: "محمود خليل الحصري", folder: "Husary_128kbps" },
+  { id: "abdulsamad", name: "عبدالباسط عبدالصمد", folder: "AbdulSamad_128kbps" },
+  { id: "dosary", name: "ياسر الدوسري", folder: "Yasser_Ad-Dussary_128kbps" },
+  { id: "shatri", name: "أبو بكر الشاطري", folder: "Abu_Bakr_Ash-Shaatree_128kbps" },
+  { id: "ghamdi", name: "سعد الغامدي", folder: "Saad_Al-Ghamdi_128kbps" },
+  { id: "muaiqly", name: "ماهر المعيقلي", folder: "MaherAlMuaiqly128kbps" },
+  { id: "tablawi", name: "محمد الطبلاوي", folder: "Mohammad_al_Tablawi_128kbps" },
+  { id: "shuraym", name: "سعود الشريم", folder: "Saud_Al-Shuraym_128kbps" },
+  { id: "sudais", name: "عبدالرحمن السديس", folder: "Abdurrahmaan_As-Sudais_192kbps" },
+  { id: "minshawi", name: "محمد صديق المنشاوي", folder: "Minshawy_Murattal_128kbps" },
 ];
 
 export const PRAYER_NAMES_AR: Record<string, string> = {

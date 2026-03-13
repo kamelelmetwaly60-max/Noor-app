@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useGeolocation } from '@/hooks/use-geolocation';
 import { usePrayerTimes } from '@/hooks/use-api';
-import { ADHAN_RECITERS, PRAYER_MESSAGES } from '@/lib/constants';
+import { ADHAN_RECITERS, PRAYER_MESSAGES, PRAYER_NAMES_AR } from '@/lib/constants';
 
 const PRAYERS_TO_NOTIFY = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
@@ -15,13 +15,14 @@ export function NotificationsManager() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playedToday = useRef<Set<string>>(new Set());
 
-  // Request notification permission on load
+  // Request notification permission on first load
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   }, []);
 
+  // Keep audio element src in sync with chosen reciter
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
@@ -30,6 +31,36 @@ export function NotificationsManager() {
     const reciter = ADHAN_RECITERS.find(r => r.id === reciterId) ?? ADHAN_RECITERS[0];
     audioRef.current.src = reciter.url;
   }, [reciterId]);
+
+  const fireAdhan = useCallback((prayer: string) => {
+    const prayerAr = PRAYER_NAMES_AR[prayer] ?? prayer;
+    const msgLines = (PRAYER_MESSAGES[prayer] ?? `حان موعد صلاة ${prayerAr}`).split('\n');
+    const title = `🕌 ${msgLines[0]}`;
+    const body = msgLines[1] ?? 'اللهم رب هذه الدعوة التامة والصلاة القائمة';
+
+    // Play adhan audio if chosen
+    if (pref === 'adhan' && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {
+        // Autoplay blocked — at least show the notification
+      });
+    }
+
+    // Show browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        const n = new Notification(title, {
+          body,
+          tag: `prayer-${prayer}-${new Date().toDateString()}`,
+          requireInteraction: true,
+        });
+        // Auto-close after 60 seconds
+        setTimeout(() => n.close(), 60000);
+      } catch {
+        // Notifications not available in this context
+      }
+    }
+  }, [pref]);
 
   useEffect(() => {
     if (pref === 'off' || !prayerTimes) return;
@@ -44,46 +75,20 @@ export function NotificationsManager() {
       PRAYERS_TO_NOTIFY.forEach(prayer => {
         const pTime = prayerTimes[prayer];
         if (!pTime) return;
-
-        // match first 5 chars "HH:MM"
         const normalizedTime = pTime.substring(0, 5);
         const key = `${dateStr}-${prayer}`;
 
         if (normalizedTime === currentStr && !playedToday.current.has(key)) {
           playedToday.current.add(key);
-
-          const msg = PRAYER_MESSAGES[prayer] ?? `حان موعد صلاة ${prayer}`;
-          const title = `🕌 ${msg.split('\n')[0]}`;
-          const body = msg.split('\n')[1] ?? 'اللهم رب هذه الدعوة التامة والصلاة القائمة';
-
-          if (pref === 'adhan' && audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => {
-              // Autoplay blocked - still show notification
-            });
-          }
-
-          if (Notification.permission === 'granted') {
-            try {
-              new Notification(title, {
-                body,
-                icon: '/images/islamic-pattern.png',
-                badge: '/images/islamic-pattern.png',
-                tag: key,
-              });
-            } catch {
-              // Notification failed silently
-            }
-          }
+          fireAdhan(prayer);
         }
       });
     };
 
-    // Check immediately
     check();
-    const interval = setInterval(check, 15000); // every 15 seconds
+    const interval = setInterval(check, 15000);
     return () => clearInterval(interval);
-  }, [pref, prayerTimes, reciterId]);
+  }, [pref, prayerTimes, fireAdhan]);
 
   return null;
 }
