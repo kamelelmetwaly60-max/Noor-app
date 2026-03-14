@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { Compass, Book, Mic, Moon, Sun, ChevronLeft } from 'lucide-react';
+import { Compass, Book, Mic, Moon, Sun, ChevronLeft, Zap, LogOut } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export function MoreMenu() {
@@ -8,22 +8,42 @@ export function MoreMenu() {
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
+
+  const handleLogout = () => {
+    if (confirm('هل تريد تسجيل الخروج وتغيير بياناتك؟')) {
+      localStorage.removeItem('user_profile');
+      window.location.reload();
     }
   };
 
+  const userProfileRaw = localStorage.getItem('user_profile');
+  const userProfile = userProfileRaw ? JSON.parse(userProfileRaw) : null;
+
   const MENU_ITEMS = [
-    { icon: Compass, label: "تحديد القبلة", path: "/qibla", color: "text-blue-500", bg: "bg-blue-500/10", desc: "اتجاه الكعبة المشرفة" },
-    { icon: Book, label: "أسماء الله الحسنى", path: "/asma", color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "99 اسماً مع معانيها" },
-    { icon: Mic, label: "القراء والاستماع", path: "/reciters", color: "text-purple-500", bg: "bg-purple-500/10", desc: "50+ قارئ" },
+    { icon: Compass, label: "تحديد القبلة",       path: "/qibla",       color: "text-blue-500",    bg: "bg-blue-500/10",    desc: "اتجاه الكعبة المشرفة" },
+    { icon: Book,    label: "أسماء الله الحسنى",  path: "/asma",        color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "99 اسماً مع معانيها" },
+    { icon: Mic,     label: "القراء والاستماع",    path: "/reciters",    color: "text-purple-500",  bg: "bg-purple-500/10",  desc: "50+ قارئ للقرآن" },
+    { icon: Zap,     label: "قارئ التدبر الذكي",  path: "/speed-reader",color: "text-amber-500",   bg: "bg-amber-500/10",   desc: "Word-by-Word Speed Reader" },
   ];
 
   return (
     <div className="pb-24 pt-6 px-4 max-w-lg mx-auto" dir="rtl">
-      <h1 className="text-2xl font-bold mb-8">المزيد</h1>
+      <h1 className="text-2xl font-bold mb-2">المزيد</h1>
+
+      {/* User profile card */}
+      {userProfile && (
+        <div className="mb-5 bg-gradient-to-l from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p className="font-bold text-base">{userProfile.name}</p>
+            <p className="text-xs text-muted-foreground">{userProfile.governorateName}</p>
+          </div>
+          <button onClick={handleLogout} className="p-2 bg-secondary rounded-full text-muted-foreground hover:text-destructive transition-colors" title="تغيير البيانات">
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <div className="space-y-3">
         {MENU_ITEMS.map((item, idx) => {
@@ -40,7 +60,7 @@ export function MoreMenu() {
                 </div>
                 <div>
                   <span className="font-bold text-base block">{item.label}</span>
-                  {item.desc && <span className="text-xs text-muted-foreground">{item.desc}</span>}
+                  <span className="text-xs text-muted-foreground">{item.desc}</span>
                 </div>
               </div>
               <ChevronLeft className="w-5 h-5 text-muted-foreground" />
@@ -62,17 +82,20 @@ export function MoreMenu() {
               <span className="text-xs text-muted-foreground">{theme === 'dark' ? 'مفعّل' : 'غير مفعّل'}</span>
             </div>
           </div>
-          <div className="w-12 h-6 bg-secondary rounded-full relative border border-border">
-            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-primary transition-all duration-300 ${theme === 'dark' ? 'left-0.5' : 'right-0.5'}`} />
+          <div className={`w-12 h-6 rounded-full relative border border-border transition-colors ${theme === 'dark' ? 'bg-primary' : 'bg-secondary'}`}>
+            <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300 ${theme === 'dark' ? 'left-0.5' : 'right-0.5'}`} />
           </div>
         </button>
       </div>
 
-      {/* App info */}
-      <div className="mt-8 text-center text-muted-foreground text-xs space-y-1">
-        <p className="text-primary/70 font-serif text-lg">نُور</p>
-        <p>تطبيق إسلامي شامل</p>
-        <p>جميع الحقوق محفوظة</p>
+      {/* Credits */}
+      <div className="mt-10 text-center space-y-1">
+        <p className="text-primary/80 font-serif text-2xl">نُور</p>
+        <p className="text-muted-foreground text-sm">تطبيق إسلامي شامل</p>
+        <div className="pt-2 border-t border-border/30 mt-3">
+          <p className="text-foreground/60 text-sm font-bold">تصميم وتطوير: سيف كامل</p>
+          <p className="text-muted-foreground text-xs mt-0.5">جميع الحقوق محفوظة © 2025</p>
+        </div>
       </div>
     </div>
   );
