@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Bell, MapPin, Clock, ChevronLeft, ChevronRight, ChevronRight as ArrowRight } from 'lucide-react';
+import { Link } from 'wouter';
 import { usePrayerTimes } from '@/hooks/use-api';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { ADHAN_RECITERS } from '@/lib/constants';
@@ -53,7 +54,7 @@ export function Home() {
 
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time24: string } | null>(null);
   const [countdown, setCountdown] = useState('');
-  const testAudioRef = useRef<HTMLAudioElement | null>(null);
+  const testAudioRef = useRef<HTMLAudioElement | null>(null); // kept for future use
 
   useEffect(() => {
     if (!times || dateOffset !== 0) return;
@@ -267,34 +268,17 @@ export function Home() {
           )}
 
           {pref === 'adhan' && (
-            <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
-              <p className="font-bold mb-3 text-sm">اختر صوت الأذان</p>
-              <div className="space-y-2 max-h-52 overflow-y-auto">
-                {ADHAN_RECITERS.map(r => (
-                  <div key={r.id} className="flex items-center justify-between gap-2">
-                    <label className="flex items-center gap-2 cursor-pointer flex-1">
-                      <input
-                        type="radio"
-                        name="reciter"
-                        value={r.id}
-                        checked={reciterId === r.id}
-                        onChange={e => setReciterId(e.target.value)}
-                        className="accent-primary w-4 h-4"
-                      />
-                      <span className="text-sm">{r.name}</span>
-                    </label>
-                    <button
-                      onClick={() => testAudio(r.url)}
-                      className="p-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-full transition-colors flex-shrink-0"
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
+            <Link href="/adhan">
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between cursor-pointer hover:bg-primary/10 transition-colors">
+                <div>
+                  <p className="font-bold text-sm" style={{ fontFamily: '"Tajawal", sans-serif' }}>اختر صوت الأذان</p>
+                  <p className="text-xs text-muted-foreground mt-0.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+                    {ADHAN_RECITERS.find(r => r.id === reciterId)?.name ?? 'أذان المدينة المنورة'}
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-primary rotate-180" />
               </div>
-            </div>
+            </Link>
           )}
         </div>
       </div>

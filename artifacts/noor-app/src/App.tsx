@@ -21,6 +21,7 @@ import { Qibla } from "@/pages/Qibla";
 import { Asma } from "@/pages/Asma";
 import { Reciters } from "@/pages/Reciters";
 import { SpeedReader } from "@/pages/SpeedReader";
+import { Adhan } from "@/pages/Adhan";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,9 @@ function Router() {
       </Route>
       <Route path="/speed-reader">
         <FullScreenShell><SpeedReader /></FullScreenShell>
+      </Route>
+      <Route path="/adhan">
+        <FullScreenShell><Adhan /></FullScreenShell>
       </Route>
 
       <Route component={NotFound} />

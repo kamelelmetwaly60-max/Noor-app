@@ -68,6 +68,12 @@ export function Quran() {
     setMemorized(prev => prev.includes(ayahKey) ? prev.filter(k => k !== ayahKey) : [...prev, ayahKey]);
   };
 
+  // Reset Juz/Hizb when surah changes so header shows fresh data immediately
+  useEffect(() => {
+    setCurrentJuz(null);
+    setCurrentHizb(null);
+  }, [selectedSurah]);
+
   const handleScroll = useCallback(() => {
     if (!scrollRef.current || !surahData) return;
     const container = scrollRef.current;
@@ -227,23 +233,49 @@ export function Quran() {
       )}
 
       {/* ── Quran Text ── */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4">
         {loadingSurah ? (
           <div className="text-center py-20 text-primary animate-pulse">جاري تحميل السورة...</div>
         ) : (
-          <div className="bg-card rounded-3xl p-6 min-h-full border border-border/30 shadow-sm">
-            {/* Surah name at top */}
-            <div className="text-center mb-6">
-              <h2 className="text-3xl font-serif text-primary mb-1">{surahName}</h2>
+          <div
+            className="rounded-2xl min-h-full border border-primary/15 shadow-md overflow-hidden"
+            style={{ background: 'linear-gradient(180deg, #fdf8ef 0%, #fef9f0 100%)' }}
+          >
+            {/* Decorative top border */}
+            <div className="h-2 w-full" style={{ background: 'linear-gradient(90deg, #b8960c 0%, #d4a843 25%, #f0c040 50%, #d4a843 75%, #b8960c 100%)' }} />
+
+            {/* Surah name banner */}
+            <div className="text-center py-5 px-4 border-b border-amber-200/60"
+              style={{ background: 'linear-gradient(180deg, #fdf3dc 0%, #fdf8ef 100%)' }}
+            >
+              {/* Decorative ornament top */}
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to right, transparent, #b8960c)' }} />
+                <svg width="18" height="18" viewBox="0 0 100 100"><polygon points="50,5 61,35 93,35 68,57 77,88 50,70 23,88 32,57 7,35 39,35" fill="#b8960c" opacity="0.8" /></svg>
+                <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to left, transparent, #b8960c)' }} />
+              </div>
+
+              <h2 className="text-3xl mb-1" style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: '#7a5c00' }}>{surahName}</h2>
               {selectedSurah !== 1 && selectedSurah !== 9 && (
-                <p className="text-xl font-serif text-foreground/70">
-                  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                <p className="text-xl mt-2" style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: '#5a4200' }}>
+                  بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
                 </p>
               )}
-              <div className="w-24 h-0.5 bg-primary/30 mx-auto mt-3" />
+
+              {/* Decorative ornament bottom */}
+              <div className="flex items-center justify-center gap-2 mt-3">
+                <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to right, transparent, #b8960c)' }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#b8960c' }} />
+                <div className="w-2 h-2 rounded-full" style={{ background: '#b8960c' }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#b8960c' }} />
+                <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to left, transparent, #b8960c)' }} />
+              </div>
             </div>
 
-            <div className="text-justify leading-[3.2rem] text-[1.7rem] font-serif text-foreground">
+            <div
+              className="p-5 text-justify leading-[3.4rem] text-[1.75rem]"
+              style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: '#1a1200', direction: 'rtl' }}
+            >
               {surahData?.ayahs?.map((ayah: any) => {
                 let text: string = ayah.text;
                 if (selectedSurah !== 1 && ayah.numberInSurah === 1) {
@@ -253,6 +285,20 @@ export function Quran() {
                 const isMemorized = memorized.includes(ayahKey);
                 const isBookmarked = bookmark?.surah === selectedSurah && bookmark?.ayah === ayah.numberInSurah;
                 const isActive = activeAyah === ayah.numberInSurah;
+
+                // Ornamental ayah end marker (mushaf style)
+                const AyahMarker = ({ num }: { num: number }) => (
+                  <span className="inline-block align-middle mx-1" style={{ direction: 'ltr', unicodeBidi: 'embed' }}>
+                    <svg width="30" height="30" viewBox="0 0 100 100" style={{ display: 'inline', verticalAlign: 'middle' }}>
+                      <circle cx="50" cy="50" r="46" fill="none" stroke="#b8960c" strokeWidth="3" />
+                      <circle cx="50" cy="50" r="38" fill="#f9f0d8" stroke="#b8960c" strokeWidth="1.5" />
+                      <text x="50" y="56" textAnchor="middle" dominantBaseline="middle"
+                        style={{ fontSize: num > 99 ? '28px' : '32px', fill: '#7a4f00', fontFamily: 'serif', fontWeight: 'bold' }}>
+                        {num}
+                      </text>
+                    </svg>
+                  </span>
+                );
 
                 // In listen mode: split into clickable words
                 if (mode === 'listen') {
@@ -272,19 +318,17 @@ export function Quran() {
                             key={wi}
                             onClick={() => handleWordClick(ayah.numberInSurah, wi + 1)}
                             className={cn(
-                              'cursor-pointer px-1 rounded transition-all duration-150',
+                              'cursor-pointer px-0.5 rounded transition-all duration-150',
                               isWordPlaying
-                                ? 'bg-primary text-primary-foreground'
-                                : 'hover:bg-primary/20'
+                                ? 'bg-amber-500/80 text-white'
+                                : 'hover:bg-amber-200/60'
                             )}
                           >
                             {word}{' '}
                           </span>
                         );
                       })}
-                      <span className="inline-flex items-center justify-center w-8 h-8 mx-1.5 rounded-full border border-primary/30 text-primary text-sm font-sans align-middle text-[0.8rem]">
-                        {ayah.numberInSurah}
-                      </span>
+                      <AyahMarker num={ayah.numberInSurah} />
                     </span>
                   );
                 }
@@ -300,21 +344,22 @@ export function Quran() {
                     onDoubleClick={e => toggleMemorized(ayahKey, e)}
                     className={cn(
                       'inline cursor-pointer transition-all duration-200 rounded-sm px-0.5',
-                      isActive && mode === 'tafsir' && 'bg-primary/20 border-b-2 border-primary',
-                      isBookmarked && !isActive && 'bg-amber-100/80 dark:bg-amber-900/30',
-                      isMemorized && 'text-green-700 dark:text-green-400',
-                      mode === 'tafsir' && 'hover:bg-primary/10',
-                      mode === 'normal' && 'hover:bg-amber-100/50 dark:hover:bg-amber-900/20'
+                      isActive && mode === 'tafsir' && 'bg-amber-300/40 border-b-2 border-amber-600',
+                      isBookmarked && !isActive && 'bg-amber-200/60',
+                      isMemorized && 'text-green-800',
+                      mode === 'tafsir' && 'hover:bg-amber-100/70',
+                      mode === 'normal' && 'hover:bg-amber-100/50'
                     )}
                   >
                     {text}
-                    <span className="inline-flex items-center justify-center w-8 h-8 mx-1.5 rounded-full border border-primary/30 text-primary text-sm font-sans align-middle text-[0.8rem]">
-                      {ayah.numberInSurah}
-                    </span>
+                    <AyahMarker num={ayah.numberInSurah} />
                   </span>
                 );
               })}
             </div>
+
+            {/* Decorative bottom border */}
+            <div className="h-2 w-full" style={{ background: 'linear-gradient(90deg, #b8960c 0%, #d4a843 25%, #f0c040 50%, #d4a843 75%, #b8960c 100%)' }} />
           </div>
         )}
       </div>

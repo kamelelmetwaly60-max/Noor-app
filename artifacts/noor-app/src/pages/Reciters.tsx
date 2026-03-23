@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useReciters } from '@/hooks/use-api';
-import { ArrowLeft, Search, ChevronRight, Music } from 'lucide-react';
+import { ArrowLeft, Search, ChevronRight } from 'lucide-react';
 import { Link } from 'wouter';
 import { useAudio } from '@/contexts/AudioContext';
 import { SURAH_NAMES } from '@/lib/constants';
@@ -50,7 +50,7 @@ const COUNTRY_FLAGS: Record<string, string> = {
 };
 
 function getFlag(country?: string): string {
-  if (!country) return '🕌';
+  if (!country) return '🌍';
   return COUNTRY_FLAGS[country] ?? COUNTRY_FLAGS[country.trim()] ?? '🌍';
 }
 
@@ -137,12 +137,8 @@ export function Reciters() {
                       className="w-full bg-card hover:bg-secondary/50 p-4 rounded-2xl border border-border shadow-sm flex items-center justify-between transition-colors"
                     >
                       <div className="flex items-center gap-3 text-right">
-                        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 relative">
-                          <Music className="w-5 h-5 text-primary" />
-                          {/* Country flag badge */}
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center text-xs shadow-sm">
-                            {flag}
-                          </div>
+                        <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl select-none">
+                          {flag}
                         </div>
                         <div>
                           <p className="font-bold" style={{ fontFamily: '"Tajawal", sans-serif' }}>{r.name}</p>
