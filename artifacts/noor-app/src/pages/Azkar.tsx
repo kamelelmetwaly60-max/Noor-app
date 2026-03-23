@@ -2,18 +2,67 @@ import { useState } from 'react';
 import { MORNING_AZKAR, EVENING_AZKAR, AZKAR_AFTER_PRAYER, AZKAR_SLEEP, AZKAR_VARIOUS } from '@/lib/constants';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { getTodayKey, cn } from '@/lib/utils';
-import { Check, RotateCcw, Sun, Moon, Star, BookOpen, Heart } from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type TabId = 'morning' | 'evening' | 'sleep' | 'after' | 'various';
 
 const TABS = [
-  { id: 'morning' as TabId,  label: 'الصباح',    icon: Sun,      data: MORNING_AZKAR },
-  { id: 'evening' as TabId,  label: 'المساء',    icon: Moon,     data: EVENING_AZKAR },
-  { id: 'sleep' as TabId,    label: 'النوم',      icon: Star,     data: AZKAR_SLEEP },
-  { id: 'after' as TabId,    label: 'بعد الصلاة', icon: BookOpen, data: AZKAR_AFTER_PRAYER },
-  { id: 'various' as TabId,  label: 'أدعية',      icon: Heart,    data: AZKAR_VARIOUS },
+  { id: 'morning' as TabId,  label: 'الصباح',    arabicIcon: '☀',  data: MORNING_AZKAR },
+  { id: 'evening' as TabId,  label: 'المساء',    arabicIcon: '🌙', data: EVENING_AZKAR },
+  { id: 'sleep' as TabId,    label: 'النوم',      arabicIcon: '✦',  data: AZKAR_SLEEP },
+  { id: 'after' as TabId,    label: 'بعد الصلاة', arabicIcon: '۞',  data: AZKAR_AFTER_PRAYER },
+  { id: 'various' as TabId,  label: 'أدعية',      arabicIcon: '❧',  data: AZKAR_VARIOUS },
 ];
+
+function IslamicOrnament({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 120 20" className={cn('w-full opacity-30', className)} preserveAspectRatio="xMidYMid meet">
+      <g fill="currentColor">
+        <polygon points="60,2 63,8 70,8 64,12 66,19 60,15 54,19 56,12 50,8 57,8" opacity="0.8" />
+        <polygon points="20,10 22,14 26,14 23,16 24,20 20,18 16,20 17,16 14,14 18,14" opacity="0.5" transform="scale(0.7) translate(14,0)" />
+        <polygon points="100,10 102,14 106,14 103,16 104,20 100,18 96,20 97,16 94,14 98,14" opacity="0.5" transform="scale(0.7) translate(-14,0)" />
+        <line x1="0" y1="10" x2="40" y2="10" stroke="currentColor" strokeWidth="0.5" opacity="0.4"/>
+        <line x1="80" y1="10" x2="120" y2="10" stroke="currentColor" strokeWidth="0.5" opacity="0.4"/>
+        <circle cx="42" cy="10" r="1.5" opacity="0.5"/>
+        <circle cx="78" cy="10" r="1.5" opacity="0.5"/>
+      </g>
+    </svg>
+  );
+}
+
+function IslamicCard({ children, isDone, className = '' }: { children: React.ReactNode; isDone: boolean; className?: string }) {
+  return (
+    <div
+      className={cn(
+        'relative rounded-3xl p-5 shadow-sm transition-all duration-500 overflow-hidden',
+        isDone
+          ? 'border-2 border-green-500/40 bg-green-50/20 dark:bg-green-900/10'
+          : 'border-2 border-[#C19A6B]/20 bg-card',
+        className
+      )}
+    >
+      {/* Islamic corner ornaments */}
+      <svg className="absolute top-2 right-2 w-8 h-8 opacity-10 text-[#C19A6B]" viewBox="0 0 40 40" fill="currentColor">
+        <path d="M0,0 L20,0 L20,5 L5,5 L5,20 L0,20 Z"/>
+        <circle cx="18" cy="18" r="4" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+      </svg>
+      <svg className="absolute top-2 left-2 w-8 h-8 opacity-10 text-[#C19A6B]" viewBox="0 0 40 40" fill="currentColor" style={{ transform: 'scaleX(-1)' }}>
+        <path d="M0,0 L20,0 L20,5 L5,5 L5,20 L0,20 Z"/>
+        <circle cx="18" cy="18" r="4" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+      </svg>
+      <svg className="absolute bottom-2 right-2 w-8 h-8 opacity-10 text-[#C19A6B]" viewBox="0 0 40 40" fill="currentColor" style={{ transform: 'scaleY(-1)' }}>
+        <path d="M0,0 L20,0 L20,5 L5,5 L5,20 L0,20 Z"/>
+        <circle cx="18" cy="18" r="4" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+      </svg>
+      <svg className="absolute bottom-2 left-2 w-8 h-8 opacity-10 text-[#C19A6B]" viewBox="0 0 40 40" fill="currentColor" style={{ transform: 'scale(-1)' }}>
+        <path d="M0,0 L20,0 L20,5 L5,5 L5,20 L0,20 Z"/>
+        <circle cx="18" cy="18" r="4" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+      </svg>
+      {children}
+    </div>
+  );
+}
 
 export function Azkar() {
   const [tab, setTab] = useState<TabId>('morning');
@@ -50,16 +99,15 @@ export function Azkar() {
     <div className="pb-24 pt-4 px-4 max-w-lg mx-auto" dir="rtl">
       {/* Header */}
       <div className="flex justify-between items-center mb-3">
-        <h1 className="text-2xl font-bold">الأذكار والأدعية</h1>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: '"Tajawal", sans-serif' }}>الأذكار والأدعية</h1>
         <button onClick={resetToday} className="p-2 bg-secondary text-primary rounded-full hover:bg-primary/20 transition-colors">
           <RotateCcw className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs with Arabic icons */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-4 custom-scrollbar">
         {TABS.map(t => {
-          const Icon = t.icon;
           const done = t.data.filter(z => (progress[z.id] ?? 0) >= z.count).length;
           const isActive = tab === t.id;
           return (
@@ -73,8 +121,8 @@ export function Azkar() {
                   : 'bg-card text-muted-foreground border-border hover:bg-secondary'
               )}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span>{t.label}</span>
+              <span className="text-base leading-none">{t.arabicIcon}</span>
+              <span style={{ fontFamily: '"Tajawal", sans-serif' }}>{t.label}</span>
               {done > 0 && !isActive && (
                 <span className="bg-green-500 text-white text-[9px] px-1 rounded-full">{done}</span>
               )}
@@ -84,7 +132,7 @@ export function Azkar() {
       </div>
 
       {/* Progress summary */}
-      <div className="mb-4 bg-card rounded-2xl px-4 py-2.5 border border-border/50 flex items-center justify-between">
+      <div className="mb-4 bg-card rounded-2xl px-4 py-2.5 border border-[#C19A6B]/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
             <div
@@ -92,10 +140,12 @@ export function Azkar() {
               style={{ width: `${azkarList.length ? (totalDone / azkarList.length) * 100 : 0}%` }}
             />
           </div>
-          <span className="text-sm text-muted-foreground">{totalDone}/{azkarList.length}</span>
+          <span className="text-sm text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+            {totalDone}/{azkarList.length}
+          </span>
         </div>
         {allDone && (
-          <span className="text-green-600 text-sm font-bold flex items-center gap-1">
+          <span className="text-green-600 text-sm font-bold flex items-center gap-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>
             <Check className="w-4 h-4" />أحسنت!
           </span>
         )}
@@ -116,43 +166,66 @@ export function Azkar() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ delay: index * 0.02, duration: 0.25 }}
-                className={cn(
-                  'bg-card border-2 rounded-3xl p-5 shadow-sm transition-all duration-500',
-                  isDone ? 'border-green-500/50 bg-green-50/30 dark:bg-green-900/10' : 'border-border/50'
-                )}
               >
-                <p className="text-lg leading-loose font-serif mb-2 whitespace-pre-wrap">{zekr.text}</p>
-                <p className="text-xs text-primary/70 mb-4 bg-primary/5 inline-block px-2 py-0.5 rounded-lg">{zekr.source}</p>
-
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    {isDone ? (
-                      <span className="text-green-600 font-bold">✓ مكتمل</span>
-                    ) : (
-                      <span>متبقي: <strong>{zekr.count - current}</strong> / {zekr.count}</span>
-                    )}
+                <IslamicCard isDone={isDone}>
+                  {/* Top ornament */}
+                  <div className="text-[#C19A6B] mb-3">
+                    <IslamicOrnament />
                   </div>
 
-                  <button
-                    onClick={() => handleTap(zekr.id, zekr.count)}
-                    disabled={isDone}
-                    className={cn(
-                      'w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl transition-all duration-300 shadow-md',
-                      isDone
-                        ? 'bg-green-500 text-white scale-105 shadow-green-500/30 cursor-not-allowed'
-                        : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 active:scale-95 cursor-pointer'
-                    )}
+                  {/* Zekr text */}
+                  <p
+                    className="text-lg leading-loose mb-1 whitespace-pre-wrap text-center"
+                    style={{ fontFamily: '"Amiri Quran", "Amiri", "Scheherazade New", serif' }}
                   >
-                    {isDone ? <Check className="w-7 h-7" /> : (zekr.count - current)}
-                  </button>
-                </div>
+                    {zekr.text}
+                  </p>
 
-                <div className="w-full bg-secondary h-1.5 rounded-full mt-4 overflow-hidden">
-                  <div
-                    className={cn('h-full transition-all duration-500 rounded-full', isDone ? 'bg-green-500' : 'bg-primary')}
-                    style={{ width: `${Math.min((current / zekr.count) * 100, 100)}%` }}
-                  />
-                </div>
+                  {/* Bottom ornament */}
+                  <div className="text-[#C19A6B] mt-2 mb-3">
+                    <IslamicOrnament />
+                  </div>
+
+                  <p className="text-xs text-primary/70 mb-4 bg-primary/5 inline-block px-3 py-1 rounded-lg border border-primary/10" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+                    {zekr.source}
+                  </p>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+                      {isDone ? (
+                        <span className="text-green-600 font-bold">✓ مكتمل</span>
+                      ) : (
+                        <span>متبقي: <strong>{zekr.count - current}</strong> / {zekr.count}</span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => handleTap(zekr.id, zekr.count)}
+                      disabled={isDone}
+                      className={cn(
+                        'w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl transition-all duration-300 shadow-md',
+                        isDone
+                          ? 'bg-green-500 text-white scale-105 shadow-green-500/30 cursor-not-allowed'
+                          : 'text-primary-foreground hover:scale-105 active:scale-95 cursor-pointer'
+                      )}
+                      style={!isDone ? {
+                        background: 'linear-gradient(135deg, #C19A6B, #a07a4a)',
+                        boxShadow: '0 4px 15px rgba(193,154,107,0.4)',
+                      } : {}}
+                    >
+                      {isDone ? <Check className="w-7 h-7" /> : (
+                        <span style={{ fontFamily: '"Tajawal", sans-serif' }}>{zekr.count - current}</span>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="w-full bg-secondary h-1.5 rounded-full mt-4 overflow-hidden">
+                    <div
+                      className={cn('h-full transition-all duration-500 rounded-full', isDone ? 'bg-green-500' : 'bg-primary')}
+                      style={{ width: `${Math.min((current / zekr.count) * 100, 100)}%` }}
+                    />
+                  </div>
+                </IslamicCard>
               </motion.div>
             );
           })}

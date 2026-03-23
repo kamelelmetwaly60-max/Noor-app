@@ -113,40 +113,59 @@ export function Home() {
     : new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }).format(displayDate);
 
   return (
-    <div className="pb-24 pt-6 px-4 max-w-lg mx-auto space-y-6" dir="rtl">
+    <div className="pb-24 pt-6 px-4 max-w-lg mx-auto space-y-5" dir="rtl">
 
       {/* Header Banner */}
-      <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-6 text-primary-foreground shadow-lg shadow-primary/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
+      <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-5 text-primary-foreground shadow-lg shadow-primary/20 relative overflow-hidden">
+        {/* Background ornament */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-12 -mt-12" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -ml-8 -mb-8" />
+
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* Hijri date with navigation */}
           <div className="flex items-center gap-3 mb-1">
             <button onClick={() => setDateOffset(d => d - 1)} className="p-1.5 bg-white/15 rounded-full hover:bg-white/25 transition-colors">
               <ChevronRight className="w-4 h-4" />
             </button>
-            <p className="text-primary-foreground/90 font-medium text-sm">{displayHijriLabel}</p>
+            <p className="text-primary-foreground/90 font-medium text-sm" style={{ fontFamily: '"Tajawal", sans-serif' }}>{displayHijriLabel}</p>
             <button onClick={() => setDateOffset(d => d + 1)} className="p-1.5 bg-white/15 rounded-full hover:bg-white/25 transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </button>
           </div>
           {dateOffset !== 0 && (
-            <button onClick={() => setDateOffset(0)} className="text-xs text-white/60 underline mb-1">
+            <button onClick={() => setDateOffset(0)} className="text-xs text-white/60 underline mb-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>
               {dateOffset > 0 ? `+${dateOffset} أيام` : `${dateOffset} أيام`} — العودة لليوم
             </button>
           )}
 
-          <h1 className="text-3xl font-serif mb-4">تطبيق نُور</h1>
+          <h1 className="text-3xl mb-3" style={{ fontFamily: '"Amiri", "Scheherazade New", serif' }}>تطبيق نُـور</h1>
 
           {dateOffset === 0 && nextPrayer ? (
             <div className="bg-black/20 backdrop-blur-md rounded-2xl p-4 w-full border border-white/10">
-              <p className="text-xs text-primary-foreground/70 mb-1 uppercase tracking-widest">الصلاة القادمة</p>
-              <p className="text-xl font-bold mb-1">{nextPrayer.name}</p>
-              <p className="text-4xl font-mono font-bold tracking-wider text-white/95">{countdown || '00:00:00'}</p>
-              <p className="text-xs text-primary-foreground/60 mt-1">{fmt12(nextPrayer.time24)}</p>
+              <p className="text-xs text-primary-foreground/60 mb-1 tracking-widest" style={{ fontFamily: '"Tajawal", sans-serif' }}>الصلاة القادمة</p>
+              <p
+                className="text-2xl font-bold mb-2"
+                style={{ fontFamily: '"Amiri", serif', textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}
+              >{nextPrayer.name}</p>
+              {/* Countdown digits styled */}
+              <div className="flex items-center justify-center gap-1 mb-1 dir-ltr" style={{ direction: 'ltr' }}>
+                {(countdown || '00:00:00').split(':').map((seg, i, arr) => (
+                  <div key={i} className="flex items-center gap-1">
+                    <div className="bg-black/30 rounded-xl px-3 py-1.5 min-w-[52px] text-center">
+                      <span
+                        className="text-3xl font-bold tracking-tight text-white"
+                        style={{ fontFamily: '"Tajawal", monospace', letterSpacing: '-0.02em' }}
+                      >{seg}</span>
+                    </div>
+                    {i < arr.length - 1 && <span className="text-white/60 text-2xl font-bold mb-1">:</span>}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-primary-foreground/60" style={{ fontFamily: '"Tajawal", sans-serif' }}>{fmt12(nextPrayer.time24)}</p>
             </div>
           ) : dateOffset !== 0 ? (
             <div className="bg-black/20 rounded-2xl p-3 w-full border border-white/10">
-              <p className="text-sm font-bold">{dateOffset > 0 ? `مواقيت بعد ${dateOffset} ${dateOffset === 1 ? 'يوم' : 'أيام'}` : `مواقيت قبل ${Math.abs(dateOffset)} ${Math.abs(dateOffset) === 1 ? 'يوم' : 'أيام'}`}</p>
+              <p className="text-sm font-bold" style={{ fontFamily: '"Tajawal", sans-serif' }}>{dateOffset > 0 ? `مواقيت بعد ${dateOffset} ${dateOffset === 1 ? 'يوم' : 'أيام'}` : `مواقيت قبل ${Math.abs(dateOffset)} ${Math.abs(dateOffset) === 1 ? 'يوم' : 'أيام'}`}</p>
             </div>
           ) : (
             <div className="animate-pulse bg-black/10 rounded-2xl h-28 w-full" />
@@ -157,12 +176,12 @@ export function Home() {
       {/* Prayer Times Grid */}
       <div className="bg-card rounded-3xl p-5 shadow-sm border border-border">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-lg flex items-center gap-2">
+          <h2 className="font-bold text-lg flex items-center gap-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>
             <Clock className="w-5 h-5 text-primary" />
             مواقيت الصلاة
           </h2>
           {userProfile.governorateName && (
-            <span className="text-xs text-primary bg-primary/10 px-3 py-1.5 rounded-full flex items-center gap-1">
+            <span className="text-xs text-primary bg-primary/10 px-3 py-1.5 rounded-full flex items-center gap-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>
               <MapPin className="w-3 h-3" />
               {userProfile.governorateName}
             </span>
@@ -170,25 +189,33 @@ export function Home() {
         </div>
 
         {times ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             {PRAYERS.map(p => {
               const t24 = (times[p.id] ?? '').substring(0, 5);
               const isNext = dateOffset === 0 && nextPrayer?.name === p.name;
               return (
                 <div
                   key={p.id}
-                  className={`flex justify-between items-center p-3 rounded-xl border transition-all ${
-                    isNext ? 'bg-primary/10 border-primary/40' : 'bg-secondary/50 border-border/50'
+                  className={`flex justify-between items-center px-4 py-3 rounded-2xl border transition-all ${
+                    isNext
+                      ? 'bg-primary/15 border-primary/50 shadow-sm shadow-primary/10'
+                      : 'bg-secondary/40 border-border/40'
                   }`}
                 >
-                  <span className={`font-medium text-sm ${isNext ? 'text-primary font-bold' : 'text-foreground/80'}`}>{p.name}</span>
-                  <span className={`font-bold text-sm ${isNext ? 'text-primary' : ''}`}>{fmt12(t24)}</span>
+                  <span
+                    className={`font-medium text-sm ${isNext ? 'text-primary font-bold' : 'text-foreground/70'}`}
+                    style={{ fontFamily: '"Tajawal", sans-serif' }}
+                  >{p.name}</span>
+                  <span
+                    className={`font-bold text-base tabular-nums ${isNext ? 'text-primary' : 'text-foreground/90'}`}
+                    style={{ fontFamily: '"Tajawal", sans-serif' }}
+                  >{fmt12(t24)}</span>
                 </div>
               );
             })}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground text-sm">
+          <div className="text-center py-8 text-muted-foreground text-sm" style={{ fontFamily: '"Tajawal", sans-serif' }}>
             {!lat ? (
               <div>
                 <p>لم يتم تحديد الموقع</p>

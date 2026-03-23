@@ -102,6 +102,7 @@ export function useReciters() {
       return data.reciters as Array<{
         id: string;
         name: string;
+        country?: string;
         moshaf: Array<{ id: number; name: string; server: string; surah_total: string; moshaf_type: number }>;
       }>;
     },
