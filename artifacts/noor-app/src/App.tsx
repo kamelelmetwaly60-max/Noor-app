@@ -134,7 +134,7 @@ function App() {
           try { return JSON.parse(localStorage.getItem('notification_pref') ?? '"off"'); } catch { return 'off'; }
         })();
         const adhanReciterId = (() => {
-          try { return JSON.parse(localStorage.getItem('adhan_reciter') ?? '"madinah"'); } catch { return 'madinah'; }
+          try { return JSON.parse(localStorage.getItem('adhan_reciter') ?? '"azan1"'); } catch { return 'azan1'; }
         })();
         reg.active.postMessage({ type: 'UPDATE_PRAYER_DATA', data: { prayerTimes, notifPref, adhanReciterId } });
       } catch {}

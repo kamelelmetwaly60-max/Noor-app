@@ -19,39 +19,90 @@ const SURAH_AYAHS: Record<number, number> = {
   105:5,106:4,107:7,108:3,109:6,110:3,111:5,112:4,113:5,114:6,
 };
 
-// Country flag map - maps country names to flag emojis
+// Country name/code → flag emoji
 const COUNTRY_FLAGS: Record<string, string> = {
-  'مصر': '🇪🇬',
-  'المملكة العربية السعودية': '🇸🇦',
-  'السعودية': '🇸🇦',
-  'الكويت': '🇰🇼',
-  'الإمارات': '🇦🇪',
-  'الإمارات العربية المتحدة': '🇦🇪',
-  'قطر': '🇶🇦',
-  'البحرين': '🇧🇭',
-  'عمان': '🇴🇲',
-  'اليمن': '🇾🇪',
-  'سوريا': '🇸🇾',
-  'ليبيا': '🇱🇾',
-  'تونس': '🇹🇳',
-  'الجزائر': '🇩🇿',
-  'المغرب': '🇲🇦',
-  'السودان': '🇸🇩',
-  'العراق': '🇮🇶',
-  'الأردن': '🇯🇴',
-  'فلسطين': '🇵🇸',
-  'لبنان': '🇱🇧',
-  'موريتانيا': '🇲🇷',
-  'باكستان': '🇵🇰',
-  'تركيا': '🇹🇷',
-  'ماليزيا': '🇲🇾',
-  'إندونيسيا': '🇮🇩',
-  'Nigeria': '🇳🇬',
+  'مصر': '🇪🇬', 'EG': '🇪🇬', 'Egypt': '🇪🇬',
+  'المملكة العربية السعودية': '🇸🇦', 'السعودية': '🇸🇦', 'SA': '🇸🇦', 'Saudi Arabia': '🇸🇦',
+  'الكويت': '🇰🇼', 'KW': '🇰🇼', 'Kuwait': '🇰🇼',
+  'الإمارات': '🇦🇪', 'الإمارات العربية المتحدة': '🇦🇪', 'AE': '🇦🇪', 'UAE': '🇦🇪',
+  'قطر': '🇶🇦', 'QA': '🇶🇦', 'Qatar': '🇶🇦',
+  'البحرين': '🇧🇭', 'BH': '🇧🇭', 'Bahrain': '🇧🇭',
+  'عمان': '🇴🇲', 'OM': '🇴🇲', 'Oman': '🇴🇲',
+  'اليمن': '🇾🇪', 'YE': '🇾🇪', 'Yemen': '🇾🇪',
+  'سوريا': '🇸🇾', 'SY': '🇸🇾', 'Syria': '🇸🇾',
+  'ليبيا': '🇱🇾', 'LY': '🇱🇾', 'Libya': '🇱🇾',
+  'تونس': '🇹🇳', 'TN': '🇹🇳', 'Tunisia': '🇹🇳',
+  'الجزائر': '🇩🇿', 'DZ': '🇩🇿', 'Algeria': '🇩🇿',
+  'المغرب': '🇲🇦', 'MA': '🇲🇦', 'Morocco': '🇲🇦',
+  'السودان': '🇸🇩', 'SD': '🇸🇩', 'Sudan': '🇸🇩',
+  'العراق': '🇮🇶', 'IQ': '🇮🇶', 'Iraq': '🇮🇶',
+  'الأردن': '🇯🇴', 'JO': '🇯🇴', 'Jordan': '🇯🇴',
+  'فلسطين': '🇵🇸', 'PS': '🇵🇸', 'Palestine': '🇵🇸',
+  'لبنان': '🇱🇧', 'LB': '🇱🇧', 'Lebanon': '🇱🇧',
+  'موريتانيا': '🇲🇷', 'MR': '🇲🇷', 'Mauritania': '🇲🇷',
+  'باكستان': '🇵🇰', 'PK': '🇵🇰', 'Pakistan': '🇵🇰',
+  'تركيا': '🇹🇷', 'TR': '🇹🇷', 'Turkey': '🇹🇷',
+  'ماليزيا': '🇲🇾', 'MY': '🇲🇾', 'Malaysia': '🇲🇾',
+  'إندونيسيا': '🇮🇩', 'ID': '🇮🇩', 'Indonesia': '🇮🇩',
+  'نيجيريا': '🇳🇬', 'Nigeria': '🇳🇬', 'NG': '🇳🇬',
+  'الصومال': '🇸🇴', 'SO': '🇸🇴', 'Somalia': '🇸🇴',
+  'غامبيا': '🇬🇲', 'GM': '🇬🇲', 'Gambia': '🇬🇲',
+  'السنغال': '🇸🇳', 'SN': '🇸🇳', 'Senegal': '🇸🇳',
 };
 
-function getFlag(country?: string): string {
-  if (!country) return '🌍';
-  return COUNTRY_FLAGS[country] ?? COUNTRY_FLAGS[country.trim()] ?? '🌍';
+// Manual nationality mapping for well-known reciters (when API doesn't provide country)
+const RECITER_COUNTRIES: Record<string, string> = {
+  // السعودية
+  'عبدالرحمن السديس': '🇸🇦', 'سعود الشريم': '🇸🇦', 'ماهر المعيقلي': '🇸🇦',
+  'أحمد العجمي': '🇸🇦', 'أحمد بن علي العجمي': '🇸🇦', 'سعد الغامدي': '🇸🇦',
+  'ياسر الدوسري': '🇸🇦', 'أبو بكر الشاطري': '🇸🇦', 'محمد أيوب': '🇸🇦',
+  'علي الحذيفي': '🇸🇦', 'إبراهيم الأخضر': '🇸🇦', 'هاني الرفاعي': '🇸🇦',
+  'نبيل الرفاعي': '🇸🇦', 'خالد القحطاني': '🇸🇦', 'إبراهيم الجبرين': '🇸🇦',
+  'عبدالله عواد الجهني': '🇸🇦', 'بندر بليلة': '🇸🇦', 'صالح الصاهود': '🇸🇦',
+  'عبدالله بصفر': '🇸🇦', 'فهد الكندري': '🇸🇦', 'عبدالله البريمي': '🇸🇦',
+  'راشد الزهراني': '🇸🇦', 'عمر السبيعي': '🇸🇦', 'عبدالله الكندري': '🇰🇼',
+  'أحمد الحواشي': '🇸🇦', 'أحمد خضر': '🇸🇦', 'حسن سالم': '🇸🇦',
+  'سعود بن إبراهيم الشريم': '🇸🇦', 'يوسف الشويعي': '🇸🇦',
+  // الكويت
+  'مشاري العفاسي': '🇰🇼', 'مشاري بن راشد العفاسي': '🇰🇼', 'ناصر القطامي': '🇰🇼',
+  'عبدالعزيز الأحمد': '🇰🇼',
+  // مصر
+  'محمود خليل الحصري': '🇪🇬', 'محمد صديق المنشاوي': '🇪🇬', 'عبدالباسط عبدالصمد': '🇪🇬',
+  'محمد الطبلاوي': '🇪🇬', 'عادل ريان': '🇪🇬', 'أيمن سويد': '🇪🇬',
+  'محمد جبريل': '🇪🇬', 'خالد عبدالكافي': '🇪🇬', 'ممدوح بيومي': '🇪🇬',
+  'محمد محمود الطبلاوي': '🇪🇬', 'محمد إسماعيل': '🇪🇬', 'أحمد الدباوي': '🇪🇬',
+  'إبراهيم السعدان': '🇸🇦', 'توفيق إبراهيم': '🇪🇬',
+  // الإمارات
+  'خليفة الطنيجي': '🇦🇪',
+  // المغرب
+  'عمر القزابري': '🇲🇦', 'مصطفى اللاهوني': '🇲🇦', 'تميم الزبيدي': '🇲🇦',
+  'سعيد الكملي': '🇲🇦', 'إدريس أبكر': '🇲🇦',
+  // الجزائر
+  'فارس عباد': '🇩🇿',
+  // تونس
+  'يحيى حواء': '🇹🇳',
+  // اليمن
+  'وديع اليمني': '🇾🇪', 'أكرم العلاقمي': '🇾🇪',
+  // لبنان
+  'توفيق الصايغ': '🇱🇧',
+};
+
+function getFlag(country?: string, name?: string): string {
+  // 1) Try by country field (Arabic name or code)
+  if (country) {
+    const fromCountry = COUNTRY_FLAGS[country] ?? COUNTRY_FLAGS[country.trim()];
+    if (fromCountry) return fromCountry;
+  }
+  // 2) Try by reciter name
+  if (name) {
+    const fromName = RECITER_COUNTRIES[name] ?? RECITER_COUNTRIES[name.trim()];
+    if (fromName) return fromName;
+    // Partial match
+    for (const [key, flag] of Object.entries(RECITER_COUNTRIES)) {
+      if (name.includes(key) || key.includes(name.split(' ')[0])) return flag;
+    }
+  }
+  return '🌍';
 }
 
 function fmtTime(s: number) {
@@ -129,7 +180,7 @@ export function Reciters() {
             <div className="space-y-2 pb-6">
               {filtered?.map((r: any) =>
                 (r.moshaf ?? []).filter((m: any) => !!m.server).map((moshaf: any, mi: number) => {
-                  const flag = getFlag(r.country);
+                  const flag = getFlag(r.country, r.name);
                   return (
                     <button
                       key={`${r.id}-${mi}`}
@@ -163,7 +214,7 @@ export function Reciters() {
 
   // ── PHASE: Surahs ──
   if (phase === 'surahs') {
-    const flag = getFlag(selectedReciter?.country);
+    const flag = getFlag(selectedReciter?.country, selectedReciter?.name);
     return (
       <div className="h-screen flex flex-col max-w-lg mx-auto bg-background" dir="rtl">
         <div className="px-4 py-4 flex items-center gap-4 bg-card shadow-sm border-b border-border flex-shrink-0">
@@ -216,7 +267,7 @@ export function Reciters() {
 
   // ── PHASE: Full Player ──
   const progress = audio.duration ? audio.currentTime / audio.duration : 0;
-  const flag = getFlag(selectedReciter?.country);
+  const flag = getFlag(selectedReciter?.country, selectedReciter?.name);
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-b from-primary/30 to-background max-w-lg mx-auto" dir="rtl">

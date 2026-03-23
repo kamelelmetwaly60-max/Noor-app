@@ -179,7 +179,7 @@ export function MoreMenu() {
           <div className="border-t border-border/30 pt-3 text-center">
             <p className="text-foreground/80 text-sm font-bold" style={{ fontFamily: '"Tajawal", sans-serif' }}>تصميم وتطوير</p>
             <p className="text-primary font-bold text-base mt-0.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>سيف كامل</p>
-            <p className="text-muted-foreground text-xs mt-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>مطوّر تطبيقات مسلم — لوجه الله تعالى</p>
+            <p className="text-muted-foreground text-xs mt-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>مطوّر تطبيق نُور</p>
             <div className="mt-3 flex items-center justify-center gap-2 text-muted-foreground/40">
               <div className="h-px flex-1 max-w-8" style={{ background: 'rgba(193,154,107,0.3)' }} />
               <svg width="16" height="16" viewBox="0 0 40 40" fill="#C19A6B" opacity={0.4}>

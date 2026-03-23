@@ -3,7 +3,7 @@ const PRAYER_CHECK_INTERVAL = 60000;
 
 let prayerTimes = null;
 let notifPref = 'off';
-let adhanReciterId = 'madinah';
+let adhanReciterId = 'azan1';
 let playedToday = {};
 
 const PRAYERS_TO_NOTIFY = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
@@ -16,7 +16,7 @@ const PRAYER_NAMES_AR = {
 };
 
 const ADHAN_URLS = {
-  madinah:  'https://www.islamicfinder.org/prayer/adhan/madinah.mp3',
+  madinah:  'https://www.islamcan.com/audio/adhan/azan1.mp3',
   makkah:   'https://www.islamicfinder.org/prayer/adhan/makkah.mp3',
   egypt:    'https://www.islamicfinder.org/prayer/adhan/egypt.mp3',
   siddiq:   'https://www.islamicfinder.org/prayer/adhan/siddiq.mp3',
@@ -37,7 +37,7 @@ self.addEventListener('message', e => {
   if (type === 'UPDATE_PRAYER_DATA') {
     prayerTimes = data.prayerTimes;
     notifPref = data.notifPref ?? 'off';
-    adhanReciterId = data.adhanReciterId ?? 'madinah';
+    adhanReciterId = data.adhanReciterId ?? 'azan1';
   }
   if (type === 'PING') {
     e.source?.postMessage({ type: 'PONG' });

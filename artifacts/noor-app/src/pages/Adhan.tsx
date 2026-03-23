@@ -1,10 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Play, Square, Volume2 } from 'lucide-react';
 import { Link } from 'wouter';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { ADHAN_RECITERS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
 
 function MosqueSVG() {
   return (
@@ -14,10 +13,7 @@ function MosqueSVG() {
       className="w-full max-w-xs mx-auto"
       style={{ filter: 'drop-shadow(0 0 20px rgba(193,154,107,0.3))' }}
     >
-      {/* Sky glow */}
       <ellipse cx="160" cy="130" rx="140" ry="80" fill="rgba(193,154,107,0.04)" />
-
-      {/* === Left far minaret === */}
       <rect x="18" y="68" width="18" height="102" fill="#2a200e" stroke="#C19A6B" strokeWidth="0.5" />
       <rect x="16" y="62" width="22" height="10" rx="2" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.5" />
       <ellipse cx="27" cy="61" rx="11" ry="14" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.7" />
@@ -26,8 +22,6 @@ function MosqueSVG() {
       <polygon points="27,39 30,46 24,46" fill="#C19A6B" />
       <rect x="22" y="90" width="10" height="8" rx="1" fill="rgba(193,154,107,0.2)" stroke="#C19A6B" strokeWidth="0.4" />
       <rect x="22" y="108" width="10" height="8" rx="1" fill="rgba(193,154,107,0.2)" stroke="#C19A6B" strokeWidth="0.4" />
-
-      {/* === Right far minaret === */}
       <rect x="284" y="68" width="18" height="102" fill="#2a200e" stroke="#C19A6B" strokeWidth="0.5" />
       <rect x="282" y="62" width="22" height="10" rx="2" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.5" />
       <ellipse cx="293" cy="61" rx="11" ry="14" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.7" />
@@ -36,8 +30,6 @@ function MosqueSVG() {
       <polygon points="293,39 296,46 290,46" fill="#C19A6B" />
       <rect x="288" y="90" width="10" height="8" rx="1" fill="rgba(193,154,107,0.2)" stroke="#C19A6B" strokeWidth="0.4" />
       <rect x="288" y="108" width="10" height="8" rx="1" fill="rgba(193,154,107,0.2)" stroke="#C19A6B" strokeWidth="0.4" />
-
-      {/* === Left main minaret === */}
       <rect x="62" y="44" width="24" height="126" fill="#2e2310" stroke="#C19A6B" strokeWidth="0.6" />
       <rect x="59" y="36" width="30" height="12" rx="2" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.6" />
       <ellipse cx="74" cy="35" rx="16" ry="18" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.8" />
@@ -47,8 +39,6 @@ function MosqueSVG() {
       <rect x="67" y="70" width="14" height="10" rx="1.5" fill="rgba(193,154,107,0.25)" stroke="#C19A6B" strokeWidth="0.4" />
       <rect x="67" y="92" width="14" height="10" rx="1.5" fill="rgba(193,154,107,0.25)" stroke="#C19A6B" strokeWidth="0.4" />
       <rect x="67" y="114" width="14" height="10" rx="1.5" fill="rgba(193,154,107,0.25)" stroke="#C19A6B" strokeWidth="0.4" />
-
-      {/* === Right main minaret === */}
       <rect x="234" y="44" width="24" height="126" fill="#2e2310" stroke="#C19A6B" strokeWidth="0.6" />
       <rect x="231" y="36" width="30" height="12" rx="2" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.6" />
       <ellipse cx="246" cy="35" rx="16" ry="18" fill="#3a2d14" stroke="#C19A6B" strokeWidth="0.8" />
@@ -58,78 +48,102 @@ function MosqueSVG() {
       <rect x="239" y="70" width="14" height="10" rx="1.5" fill="rgba(193,154,107,0.25)" stroke="#C19A6B" strokeWidth="0.4" />
       <rect x="239" y="92" width="14" height="10" rx="1.5" fill="rgba(193,154,107,0.25)" stroke="#C19A6B" strokeWidth="0.4" />
       <rect x="239" y="114" width="14" height="10" rx="1.5" fill="rgba(193,154,107,0.25)" stroke="#C19A6B" strokeWidth="0.4" />
-
-      {/* === Main mosque body === */}
       <rect x="86" y="100" width="148" height="70" fill="#241a08" stroke="#C19A6B" strokeWidth="0.8" />
-
-      {/* === Side small domes === */}
       <ellipse cx="107" cy="100" rx="22" ry="26" fill="#2e2310" stroke="#C19A6B" strokeWidth="0.8" />
       <ellipse cx="107" cy="93" rx="10" ry="12" fill="#C19A6B" opacity="0.3" />
       <ellipse cx="213" cy="100" rx="22" ry="26" fill="#2e2310" stroke="#C19A6B" strokeWidth="0.8" />
       <ellipse cx="213" cy="93" rx="10" ry="12" fill="#C19A6B" opacity="0.3" />
-
-      {/* === Central main dome === */}
       <ellipse cx="160" cy="96" rx="52" ry="58" fill="#2e2310" stroke="#C19A6B" strokeWidth="1" />
       <ellipse cx="160" cy="80" rx="30" ry="35" fill="#C19A6B" opacity="0.18" />
       <ellipse cx="160" cy="72" rx="16" ry="18" fill="#C19A6B" opacity="0.25" />
       <line x1="160" y1="50" x2="160" y2="56" stroke="#C19A6B" strokeWidth="2" />
       <polygon points="160,45 164,54 156,54" fill="#C19A6B" />
       <circle cx="160" cy="59" r="3" fill="#C19A6B" opacity="0.9" />
-
-      {/* === Arched windows on body === */}
       {[110, 145, 160, 175, 210].map((x, i) => (
-        <g key={i}>
-          <rect x={x - 9} y="114" width="18" height="25" rx="9" fill="rgba(193,154,107,0.15)" stroke="#C19A6B" strokeWidth="0.5" />
-        </g>
+        <rect key={i} x={x - 9} y="114" width="18" height="25" rx="9" fill="rgba(193,154,107,0.15)" stroke="#C19A6B" strokeWidth="0.5" />
       ))}
-
-      {/* === Main entrance arch === */}
       <rect x="140" y="120" width="40" height="50" rx="20" fill="#1a1204" stroke="#C19A6B" strokeWidth="0.8" />
       <rect x="144" y="140" width="32" height="30" fill="#1a1204" />
-
-      {/* === Ground line === */}
       <line x1="0" y1="170" x2="320" y2="170" stroke="#C19A6B" strokeWidth="0.8" opacity="0.5" />
-
-      {/* === Stars in sky === */}
-      {[
-        [30, 20], [55, 10], [80, 28], [200, 14], [240, 22], [270, 8], [295, 18],
-        [130, 16], [165, 8], [40, 35],
-      ].map(([sx, sy], i) => (
-        <circle key={i} cx={sx} cy={sy} r="1.2" fill="#C19A6B" opacity={0.4 + (i % 3) * 0.2} />
+      {[[30,20],[55,10],[80,28],[200,14],[240,22],[270,8],[295,18],[130,16],[165,8],[40,35]].map(([sx,sy],i) => (
+        <circle key={i} cx={sx} cy={sy} r="1.2" fill="#C19A6B" opacity={0.4+(i%3)*0.2} />
       ))}
-
-      {/* === Crescent moon === */}
       <path d="M 50 18 A 10 10 0 1 1 62 12 A 7 7 0 1 0 50 18Z" fill="#C19A6B" opacity="0.8" />
     </svg>
   );
 }
 
 export function Adhan() {
-  const [reciterId, setReciterId] = useLocalStorage<string>('adhan_reciter', 'madinah');
+  const [reciterId, setReciterId] = useLocalStorage<string>('adhan_reciter', 'azan1');
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const cacheRef = useRef<Record<string, HTMLAudioElement>>({});
 
   const selectedReciter = ADHAN_RECITERS.find(r => r.id === reciterId) ?? ADHAN_RECITERS[0];
+
+  // Preload selected reciter + neighbors for instant playback
+  useEffect(() => {
+    const preload = (id: string, url: string, mode: 'auto' | 'metadata') => {
+      if (cacheRef.current[id]) return;
+      const a = new Audio();
+      a.preload = mode;
+      a.src = url;
+      a.load();
+      cacheRef.current[id] = a;
+    };
+
+    const idx = ADHAN_RECITERS.findIndex(r => r.id === selectedReciter.id);
+    preload(selectedReciter.id, selectedReciter.url, 'auto');
+    for (let i = 1; i <= 3; i++) {
+      const next = ADHAN_RECITERS[idx + i];
+      if (next) preload(next.id, next.url, 'metadata');
+      const prev = ADHAN_RECITERS[idx - i];
+      if (prev) preload(prev.id, prev.url, 'metadata');
+    }
+  }, [selectedReciter]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   const playAdhan = (id: string, url: string) => {
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current = null;
+      audioRef.current.currentTime = 0;
     }
     if (playingId === id) {
       setPlayingId(null);
+      audioRef.current = null;
       return;
     }
-    const a = new Audio(url);
+    let a = cacheRef.current[id];
+    if (!a) {
+      a = new Audio();
+      a.preload = 'auto';
+      a.src = url;
+      a.load();
+      cacheRef.current[id] = a;
+    }
+    a.currentTime = 0;
     audioRef.current = a;
-    a.play().catch(() => {});
+    const p = a.play();
+    if (p) p.catch(() => {});
     setPlayingId(id);
     a.onended = () => setPlayingId(null);
     a.onerror = () => setPlayingId(null);
   };
 
   const stopAll = () => {
-    audioRef.current?.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     audioRef.current = null;
     setPlayingId(null);
   };
@@ -143,7 +157,11 @@ export function Adhan() {
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-12 pb-4">
         <Link href="/">
-          <button className="p-2 rounded-full" style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.3)' }}>
+          <button
+            className="p-2 rounded-full"
+            style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.3)' }}
+            onClick={stopAll}
+          >
             <ArrowLeft className="w-5 h-5" style={{ color: '#C19A6B' }} />
           </button>
         </Link>
@@ -161,7 +179,6 @@ export function Adhan() {
       >
         <MosqueSVG />
 
-        {/* Decorative line */}
         <div className="flex items-center justify-center gap-2 mt-3">
           <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to right, transparent, rgba(193,154,107,0.5))' }} />
           <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#C19A6B', opacity: 0.7 }} />
@@ -225,20 +242,15 @@ export function Adhan() {
                 key={r.id}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + i * 0.04, duration: 0.4 }}
+                transition={{ delay: 0.05 + i * 0.04, duration: 0.4 }}
                 className="flex items-center justify-between rounded-2xl px-4 py-3 transition-all cursor-pointer"
                 style={{
-                  background: isSelected
-                    ? 'rgba(193,154,107,0.18)'
-                    : 'rgba(255,255,255,0.04)',
-                  border: isSelected
-                    ? '1px solid rgba(193,154,107,0.5)'
-                    : '1px solid rgba(255,255,255,0.07)',
+                  background: isSelected ? 'rgba(193,154,107,0.18)' : 'rgba(255,255,255,0.04)',
+                  border: isSelected ? '1px solid rgba(193,154,107,0.5)' : '1px solid rgba(255,255,255,0.07)',
                 }}
                 onClick={() => { setReciterId(r.id); stopAll(); }}
               >
                 <div className="flex items-center gap-3">
-                  {/* Selection indicator */}
                   <div
                     className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
                     style={{
@@ -253,32 +265,25 @@ export function Adhan() {
                       {r.name}
                     </p>
                     {isPlaying && (
-                      <div className="flex gap-0.5 mt-1">
-                        {[1, 2, 3, 4].map(b => (
+                      <div className="flex items-center gap-0.5 mt-1">
+                        {[1,2,3,4].map(b => (
                           <div
                             key={b}
                             className="w-0.5 rounded-full animate-bounce"
-                            style={{
-                              height: `${6 + b * 3}px`,
-                              background: '#C19A6B',
-                              animationDelay: `${b * 0.1}s`,
-                            }}
+                            style={{ height: `${6+b*3}px`, background: '#C19A6B', animationDelay: `${b*0.1}s` }}
                           />
                         ))}
-                        <p className="text-xs mr-1" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>يعزف...</p>
+                        <p className="text-xs mr-1.5" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>يُشغَّل...</p>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Test play button */}
                 <button
                   onClick={e => { e.stopPropagation(); playAdhan(r.id, r.url); }}
                   className="w-10 h-10 rounded-full flex items-center justify-center transition-all flex-shrink-0"
                   style={{
-                    background: isPlaying
-                      ? 'rgba(193,154,107,0.35)'
-                      : 'rgba(193,154,107,0.12)',
+                    background: isPlaying ? 'rgba(193,154,107,0.35)' : 'rgba(193,154,107,0.12)',
                     border: '1px solid rgba(193,154,107,0.35)',
                   }}
                 >

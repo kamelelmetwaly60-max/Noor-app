@@ -139,7 +139,7 @@ function AdhanModal({ prayer, onClose }: AdhanModalProps) {
 
 export function NotificationsManager() {
   const [pref] = useLocalStorage<'off' | 'text' | 'adhan'>('notification_pref', 'adhan');
-  const [reciterId] = useLocalStorage<string>('adhan_reciter', 'madinah');
+  const [reciterId] = useLocalStorage<string>('adhan_reciter', 'azan1');
   const [adhanPrayer, setAdhanPrayer] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -159,6 +159,7 @@ export function NotificationsManager() {
       const t = setTimeout(() => Notification.requestPermission(), 3000);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, []);
 
   useEffect(() => {

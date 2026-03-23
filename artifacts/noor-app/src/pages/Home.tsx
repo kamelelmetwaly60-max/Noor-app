@@ -37,7 +37,7 @@ function offsetDate(offset: number): Date {
 
 export function Home() {
   const [pref, setPref] = useLocalStorage<'off' | 'text' | 'adhan'>('notification_pref', 'adhan');
-  const [reciterId, setReciterId] = useLocalStorage<string>('adhan_reciter', 'madinah');
+  const [reciterId, setReciterId] = useLocalStorage<string>('adhan_reciter', 'azan1');
   const [dateOffset, setDateOffset] = useState(0);
 
   // Get coords from user profile
