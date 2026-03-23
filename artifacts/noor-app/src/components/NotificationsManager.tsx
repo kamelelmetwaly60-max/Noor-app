@@ -202,28 +202,62 @@ export function NotificationsManager() {
     }
   }, [pref]);
 
+  // Helper to send prayer data to service worker
+  const sendToSW = useCallback(() => {
+    if (!navigator.serviceWorker?.controller || !prayerTimes) return;
+    try {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'UPDATE_PRAYER_DATA',
+        data: { prayerTimes, notifPref: pref, adhanReciterId: reciterId },
+      });
+    } catch {}
+  }, [prayerTimes, pref, reciterId]);
+
+  // Send to SW whenever prayer data or pref changes
+  useEffect(() => { sendToSW(); }, [sendToSW]);
+
+  // Listen for REQUEST_PRAYER_DATA from SW (e.g. after SW restarts)
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'REQUEST_PRAYER_DATA') sendToSW();
+    };
+    navigator.serviceWorker?.addEventListener('message', handler);
+    return () => navigator.serviceWorker?.removeEventListener('message', handler);
+  }, [sendToSW]);
+
+  // Precise in-app scheduling — schedule exactly at each prayer time
   useEffect(() => {
     if (pref === 'off' || !prayerTimes) return;
-    const check = () => {
-      const now = new Date();
-      const hh = now.getHours().toString().padStart(2, '0');
-      const mm = now.getMinutes().toString().padStart(2, '0');
-      const currentStr = `${hh}:${mm}`;
-      const dateStr = now.toDateString();
-      PRAYERS_TO_NOTIFY.forEach(prayer => {
-        const pTime = prayerTimes[prayer];
-        if (!pTime) return;
-        const normalizedTime = pTime.substring(0, 5);
-        const key = `${dateStr}-${prayer}`;
-        if (normalizedTime === currentStr && !playedToday.current.has(key)) {
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    const now = Date.now();
+    const dateStr = new Date().toDateString();
+
+    PRAYERS_TO_NOTIFY.forEach(prayer => {
+      const timeStr = prayerTimes[prayer];
+      if (!timeStr) return;
+      const [hh, mm] = timeStr.substring(0, 5).split(':').map(Number);
+      const target = new Date();
+      target.setHours(hh, mm, 0, 0);
+      const delay = target.getTime() - now;
+      const key = `${dateStr}-${prayer}`;
+
+      if (delay > 0 && delay < 86400000) {
+        timeouts.push(setTimeout(() => {
+          if (!playedToday.current.has(key)) {
+            playedToday.current.add(key);
+            fireAdhan(prayer);
+          }
+        }, delay));
+      } else if (delay > -60000 && delay <= 0) {
+        // Within the current minute window — fire immediately if not played
+        if (!playedToday.current.has(key)) {
           playedToday.current.add(key);
           fireAdhan(prayer);
         }
-      });
-    };
-    check();
-    const interval = setInterval(check, 15000);
-    return () => clearInterval(interval);
+      }
+    });
+
+    return () => timeouts.forEach(id => clearTimeout(id));
   }, [pref, prayerTimes, fireAdhan]);
 
   if (!adhanPrayer) return null;

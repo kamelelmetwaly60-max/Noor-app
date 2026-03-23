@@ -279,15 +279,39 @@ export function Reciters() {
         <div className="w-9" />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-8 gap-6">
-        <div className="w-64 h-64 bg-gradient-to-br from-primary to-primary/50 rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/30">
-          <span className="text-white text-8xl" style={{ fontFamily: '"Amiri", serif' }}>ق</span>
+      <div className="flex-1 flex flex-col items-center justify-center px-8 gap-8">
+        {/* Vinyl disc with flag in exact bottom half */}
+        <div className="relative" style={{ width: 220, height: 220 }}>
+          {/* Outer ring */}
+          <div className="absolute inset-0 rounded-full" style={{
+            background: 'linear-gradient(135deg, #b8870a 0%, #6b4c10 100%)',
+            boxShadow: '0 8px 40px rgba(193,154,107,0.4), 0 0 0 4px rgba(193,154,107,0.15)',
+          }} />
+          {/* Top half — Quranic letter */}
+          <div className="absolute inset-[6px] rounded-full overflow-hidden">
+            {/* Full circle base */}
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, #2a1e08 0%, #1a1205 100%)' }} />
+            {/* Top half layer */}
+            <div className="absolute top-0 left-0 right-0 h-1/2 flex items-end justify-center pb-2"
+              style={{ background: 'linear-gradient(180deg, rgba(193,154,107,0.18) 0%, rgba(193,154,107,0.06) 100%)' }}>
+              <span className="text-7xl leading-none" style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: '#d4b483' }}>ق</span>
+            </div>
+            {/* Divider */}
+            <div className="absolute top-1/2 left-4 right-4 h-px" style={{ background: 'rgba(193,154,107,0.35)', transform: 'translateY(-50%)' }} />
+            {/* Bottom half — flag */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 flex items-center justify-center pt-2"
+              style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(193,154,107,0.08) 100%)' }}>
+              <span className="text-5xl leading-none select-none">{flag}</span>
+            </div>
+          </div>
+          {/* Center spindle */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full z-10"
+            style={{ background: '#C19A6B', boxShadow: '0 0 8px rgba(193,154,107,0.6)' }} />
         </div>
 
         <div className="text-center w-full">
           <h2 className="text-2xl font-bold" style={{ fontFamily: '"Amiri", serif' }}>سورة {audio.surahName}</h2>
-          <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>
-            <span>{flag}</span>
+          <p className="text-muted-foreground mt-1 flex items-center justify-center gap-1.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>
             <span>{audio.reciterName}</span>
           </p>
         </div>
