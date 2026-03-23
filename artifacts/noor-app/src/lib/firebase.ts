@@ -8,26 +8,36 @@ const firebaseConfig = {
   storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const isConfigured = Object.values(firebaseConfig).every(Boolean);
+const isConfigured = !!(
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId &&
+  firebaseConfig.appId
+);
 
-const app = isConfigured && getApps().length === 0
-  ? initializeApp(firebaseConfig)
-  : getApps()[0];
+let app: ReturnType<typeof initializeApp> | null = null;
 
-export const auth = isConfigured ? getAuth(app) : null;
+if (isConfigured) {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+}
+
+export const auth = (isConfigured && app) ? getAuth(app) : null;
 export const googleProvider = new GoogleAuthProvider();
+
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export async function signInWithGoogle(): Promise<{ name: string; email: string; photo: string } | null> {
   if (!auth) {
-    console.warn('Firebase not configured');
+    console.warn('Firebase غير مُعَد — تأكد من إضافة متغيرات البيئة');
     return null;
   }
   const result = await signInWithPopup(auth, googleProvider);
   const user = result.user;
   return {
-    name: user.displayName ?? '',
+    name:  user.displayName ?? '',
     email: user.email ?? '',
     photo: user.photoURL ?? '',
   };
