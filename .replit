@@ -1,4 +1,4 @@
-modules = ["nodejs-24"]
+modules = ["nodejs-20", "web", "bash"]
 
 [[artifacts]]
 id = "artifacts/api-server"
@@ -55,3 +55,6 @@ VITE_FIREBASE_STORAGE_BUCKET = "noor-app-42696.firebasestorage.app"
 VITE_FIREBASE_MESSAGING_SENDER_ID = "716336237791"
 VITE_FIREBASE_APP_ID = "1:716336237791:web:4c57f956ec276f9848ad6a"
 VITE_FIREBASE_MEASUREMENT_ID = "G-36M36YHHSQ"
+
+[nix]
+channel = "stable-25_05"
