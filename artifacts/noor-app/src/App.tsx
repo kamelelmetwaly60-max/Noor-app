@@ -4,6 +4,54 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect, useState, useCallback } from "react";
 import NotFound from "@/pages/not-found";
+import { Bell } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+function NotifPermDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4" dir="rtl">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <motion.div
+        initial={{ scale: 0.85, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.85, opacity: 0, y: 20 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="relative bg-card border border-border rounded-3xl p-7 w-full max-w-xs shadow-2xl text-center"
+      >
+        <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mx-auto mb-4">
+          <Bell className="w-8 h-8 text-primary" />
+        </div>
+        <h3 className="font-bold text-xl mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+          يريد تطبيق نُور إرسال إشعارات إليك
+        </h3>
+        <p className="text-muted-foreground text-sm mb-6 leading-relaxed" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+          سنُعلمك عند حلول كل وقت صلاة حتى لا تفوتك صلاة واحدة بإذن الله.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3.5 rounded-2xl bg-secondary text-foreground font-bold text-sm hover:bg-secondary/80 transition-colors"
+            style={{ fontFamily: '"Tajawal", sans-serif' }}
+          >
+            لاحقاً
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3.5 rounded-2xl font-bold text-sm shadow-lg transition-all hover:opacity-90"
+            style={{
+              background: 'linear-gradient(135deg, #C19A6B, #a07a4a)',
+              color: '#fff',
+              fontFamily: '"Tajawal", sans-serif',
+              boxShadow: '0 4px 15px rgba(193,154,107,0.35)',
+            }}
+          >
+            السماح
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 import { BottomNav } from "@/components/layout/BottomNav";
 import { NotificationsManager } from "@/components/NotificationsManager";
@@ -87,6 +135,7 @@ function Router() {
 function App() {
   const [splashDone, setSplashDone] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [showNotifDialog, setShowNotifDialog] = useState(false);
 
   const handleSplashDone = useCallback(() => {
     setSplashDone(true);
@@ -97,6 +146,28 @@ function App() {
     }
     const profile = localStorage.getItem('user_profile');
     setIsLoggedIn(!!profile);
+  }, []);
+
+  const handleLoginComplete = useCallback(() => {
+    setIsLoggedIn(true);
+    if ('Notification' in window && Notification.permission === 'default') {
+      setTimeout(() => setShowNotifDialog(true), 600);
+    }
+  }, []);
+
+  const handleNotifConfirm = useCallback(async () => {
+    setShowNotifDialog(false);
+    if ('Notification' in window) {
+      const result = await Notification.requestPermission();
+      if (result === 'granted') {
+        const notifPref = (() => {
+          try { return JSON.parse(localStorage.getItem('notification_pref') ?? '"adhan"'); } catch { return 'adhan'; }
+        })();
+        if (notifPref === 'off') {
+          localStorage.setItem('notification_pref', JSON.stringify('adhan'));
+        }
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -146,6 +217,15 @@ function App() {
 
   return (
     <>
+      <AnimatePresence>
+        {showNotifDialog && (
+          <NotifPermDialog
+            onConfirm={handleNotifConfirm}
+            onCancel={() => setShowNotifDialog(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {!splashDone && <SplashScreen onDone={handleSplashDone} />}
 
       {splashDone && isLoggedIn === null && (
@@ -159,7 +239,7 @@ function App() {
 
       {splashDone && isLoggedIn === false && (
         <QueryClientProvider client={queryClient}>
-          <Login onComplete={() => setIsLoggedIn(true)} />
+          <Login onComplete={handleLoginComplete} />
         </QueryClientProvider>
       )}
 
