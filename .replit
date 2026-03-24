@@ -58,3 +58,4 @@ VITE_FIREBASE_MEASUREMENT_ID = "G-36M36YHHSQ"
 
 [nix]
 channel = "stable-25_05"
+packages = ["zulu17"]
