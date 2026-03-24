@@ -137,6 +137,12 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [showNotifDialog, setShowNotifDialog] = useState(false);
 
+  const maybeShowNotifDialog = useCallback(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      setTimeout(() => setShowNotifDialog(true), 800);
+    }
+  }, []);
+
   const handleSplashDone = useCallback(() => {
     setSplashDone(true);
     document.documentElement.dir = 'rtl';
@@ -145,28 +151,53 @@ function App() {
       document.documentElement.classList.add('dark');
     }
     const profile = localStorage.getItem('user_profile');
-    setIsLoggedIn(!!profile);
-  }, []);
+    const loggedIn = !!profile;
+    setIsLoggedIn(loggedIn);
+    if (loggedIn) maybeShowNotifDialog();
+  }, [maybeShowNotifDialog]);
 
   const handleLoginComplete = useCallback(() => {
     setIsLoggedIn(true);
-    if ('Notification' in window && Notification.permission === 'default') {
-      setTimeout(() => setShowNotifDialog(true), 600);
-    }
-  }, []);
+    maybeShowNotifDialog();
+  }, [maybeShowNotifDialog]);
 
   const handleNotifConfirm = useCallback(async () => {
     setShowNotifDialog(false);
-    if ('Notification' in window) {
-      const result = await Notification.requestPermission();
-      if (result === 'granted') {
-        const notifPref = (() => {
-          try { return JSON.parse(localStorage.getItem('notification_pref') ?? '"adhan"'); } catch { return 'adhan'; }
-        })();
-        if (notifPref === 'off') {
-          localStorage.setItem('notification_pref', JSON.stringify('adhan'));
-        }
+    if (!('Notification' in window)) return;
+    const result = await Notification.requestPermission();
+    if (result === 'granted') {
+      // Make sure notification pref is not 'off'
+      const stored = (() => {
+        try { return JSON.parse(localStorage.getItem('notification_pref') ?? '"adhan"'); } catch { return 'adhan'; }
+      })();
+      if (stored === 'off') {
+        localStorage.setItem('notification_pref', JSON.stringify('adhan'));
       }
+      // Send prayer data to SW immediately after getting permission
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        if (!reg?.active) return;
+        const profile = (() => {
+          try { return JSON.parse(localStorage.getItem('user_profile') ?? '{}'); } catch { return {}; }
+        })();
+        const { lat, lng } = profile;
+        if (!lat || !lng) return;
+        const now = new Date();
+        const dd   = now.getDate().toString().padStart(2, '0');
+        const mm   = (now.getMonth() + 1).toString().padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const res = await fetch(
+          `https://api.aladhan.com/v1/timings/${dd}-${mm}-${yyyy}?latitude=${lat}&longitude=${lng}&method=5`
+        );
+        const data = await res.json();
+        const prayerTimes = data?.data?.timings;
+        if (!prayerTimes) return;
+        const notifPref = stored === 'off' ? 'adhan' : stored;
+        const adhanReciterId = (() => {
+          try { return JSON.parse(localStorage.getItem('adhan_reciter') ?? '"azan1"'); } catch { return 'azan1'; }
+        })();
+        reg.active.postMessage({ type: 'UPDATE_PRAYER_DATA', data: { prayerTimes, notifPref, adhanReciterId } });
+      } catch {}
     }
   }, []);
 
@@ -181,9 +212,11 @@ function App() {
   // Send prayer data to service worker for background notifications
   useEffect(() => {
     if (!isLoggedIn) return;
+
     const sendToSW = async () => {
       if (!('serviceWorker' in navigator)) return;
-      const reg = await navigator.serviceWorker.getRegistration('/');
+      if (Notification.permission !== 'granted') return;
+      const reg = await navigator.serviceWorker.ready;
       if (!reg?.active) return;
       const profile = (() => {
         try { return JSON.parse(localStorage.getItem('user_profile') ?? '{}'); } catch { return {}; }
@@ -191,8 +224,8 @@ function App() {
       const { lat, lng } = profile;
       if (!lat || !lng) return;
       const now = new Date();
-      const dd = now.getDate().toString().padStart(2, '0');
-      const mm = (now.getMonth() + 1).toString().padStart(2, '0');
+      const dd   = now.getDate().toString().padStart(2, '0');
+      const mm   = (now.getMonth() + 1).toString().padStart(2, '0');
       const yyyy = now.getFullYear();
       try {
         const res = await fetch(
@@ -202,7 +235,7 @@ function App() {
         const prayerTimes = data?.data?.timings;
         if (!prayerTimes) return;
         const notifPref = (() => {
-          try { return JSON.parse(localStorage.getItem('notification_pref') ?? '"off"'); } catch { return 'off'; }
+          try { return JSON.parse(localStorage.getItem('notification_pref') ?? '"adhan"'); } catch { return 'adhan'; }
         })();
         const adhanReciterId = (() => {
           try { return JSON.parse(localStorage.getItem('adhan_reciter') ?? '"azan1"'); } catch { return 'azan1'; }
@@ -210,9 +243,32 @@ function App() {
         reg.active.postMessage({ type: 'UPDATE_PRAYER_DATA', data: { prayerTimes, notifPref, adhanReciterId } });
       } catch {}
     };
+
+    // Listen for SW requesting fresh prayer data (e.g. after SW restarts)
+    const handleSWMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'REQUEST_PRAYER_DATA') sendToSW();
+    };
+    navigator.serviceWorker?.addEventListener('message', handleSWMessage);
+
     sendToSW();
     const interval = setInterval(sendToSW, 1000 * 60 * 60);
-    return () => clearInterval(interval);
+
+    // Register periodic background sync if supported (keeps SW alive when app is closed)
+    const registerPeriodicSync = async () => {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const status = await (navigator.permissions as any).query({ name: 'periodic-background-sync' });
+        if (status.state === 'granted') {
+          await (reg as any).periodicSync.register('prayer-refresh', { minInterval: 60 * 60 * 1000 });
+        }
+      } catch {}
+    };
+    registerPeriodicSync();
+
+    return () => {
+      clearInterval(interval);
+      navigator.serviceWorker?.removeEventListener('message', handleSWMessage);
+    };
   }, [isLoggedIn]);
 
   return (

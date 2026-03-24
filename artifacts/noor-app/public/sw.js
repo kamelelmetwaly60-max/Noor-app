@@ -1,10 +1,6 @@
-const CACHE_NAME = 'noor-sw-v3';
-
-let prayerTimes = null;
-let notifPref = 'off';
-let adhanReciterId = 'azan1';
-let scheduledIds = [];
-let midnightId = null;
+const CACHE_NAME = 'noor-sw-v4';
+const DB_NAME = 'noor-prayer-db';
+const DB_STORE = 'prayer-data';
 
 const PRAYERS_TO_NOTIFY = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const PRAYER_NAMES_AR = {
@@ -15,37 +11,111 @@ const PRAYER_NAMES_AR = {
   Isha: 'العشاء',
 };
 
-self.addEventListener('install', e => {
-  self.skipWaiting();
-});
+// ── IndexedDB helpers (persist prayer data across SW restarts) ────────────────
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore(DB_STORE);
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function dbGet(key) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readonly');
+      const req = tx.objectStore(DB_STORE).get(key);
+      req.onsuccess = e => resolve(e.target.result);
+      req.onerror = e => reject(e.target.error);
+    });
+  } catch { return null; }
+}
+
+async function dbSet(key, value) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      const req = tx.objectStore(DB_STORE).put(value, key);
+      req.onsuccess = () => resolve();
+      req.onerror = e => reject(e.target.error);
+    });
+  } catch {}
+}
+
+// ── In-memory state ──────────────────────────────────────────────────────────
+
+let prayerTimes = null;
+let notifPref = 'off';
+let adhanReciterId = 'azan1';
+let scheduledIds = [];
+let midnightId = null;
+
+// ── Lifecycle ────────────────────────────────────────────────────────────────
+
+self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    Promise.all([
-      clients.claim(),
-      // Ask all open clients to resend prayer data
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-        list.forEach(c => { try { c.postMessage({ type: 'REQUEST_PRAYER_DATA' }); } catch {} });
-      }),
-    ])
+    (async () => {
+      await clients.claim();
+      // Try to restore prayer data from IndexedDB
+      const saved = await dbGet('prayerData');
+      if (saved) {
+        prayerTimes    = saved.prayerTimes;
+        notifPref      = saved.notifPref  ?? 'off';
+        adhanReciterId = saved.adhanReciterId ?? 'azan1';
+        scheduleAll();
+      }
+      // Ask open pages to send fresh data
+      const list = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      list.forEach(c => { try { c.postMessage({ type: 'REQUEST_PRAYER_DATA' }); } catch {} });
+      scheduleMidnightRefresh();
+    })()
   );
-  scheduleMidnightRefresh();
 });
 
-self.addEventListener('message', e => {
+// ── Message handler ──────────────────────────────────────────────────────────
+
+self.addEventListener('message', async e => {
   const { type, data } = e.data ?? {};
+
   if (type === 'UPDATE_PRAYER_DATA') {
-    prayerTimes = data.prayerTimes;
-    notifPref = data.notifPref ?? 'off';
+    prayerTimes    = data.prayerTimes;
+    notifPref      = data.notifPref  ?? 'off';
     adhanReciterId = data.adhanReciterId ?? 'azan1';
+    // Persist to IndexedDB so SW can recover after restart
+    await dbSet('prayerData', { prayerTimes, notifPref, adhanReciterId, savedAt: Date.now() });
     scheduleAll();
   }
+
   if (type === 'PING') {
     try { e.source?.postMessage({ type: 'PONG' }); } catch {}
   }
 });
 
-// ── Precise scheduling ──────────────────────────────────────────────────────
+// ── Periodic background sync ─────────────────────────────────────────────────
+
+self.addEventListener('periodicsync', async e => {
+  if (e.tag === 'prayer-refresh') {
+    e.waitUntil((async () => {
+      const saved = await dbGet('prayerData');
+      if (saved) {
+        prayerTimes    = saved.prayerTimes;
+        notifPref      = saved.notifPref  ?? 'off';
+        adhanReciterId = saved.adhanReciterId ?? 'azan1';
+        scheduleAll();
+      }
+    })());
+  }
+});
+
+// ── Scheduling ───────────────────────────────────────────────────────────────
 
 function clearScheduled() {
   scheduledIds.forEach(id => clearTimeout(id));
@@ -62,20 +132,14 @@ function scheduleAll() {
     const timeStr = prayerTimes[prayer];
     if (!timeStr) return;
 
-    const parts = timeStr.substring(0, 5).split(':');
-    const hh = parseInt(parts[0], 10);
-    const mm = parseInt(parts[1], 10);
-
+    const [hh, mm] = timeStr.substring(0, 5).split(':').map(Number);
     const target = new Date();
     target.setHours(hh, mm, 0, 0);
 
     const delay = target.getTime() - now;
-
-    // Only schedule if within next 24 hours and strictly in the future
-    if (delay > 0 && delay < 86400000) {
+    if (delay > 0 && delay < 86_400_000) {
       const id = setTimeout(() => {
         fireNotification(prayer);
-        // Remove this id from tracking
         scheduledIds = scheduledIds.filter(x => x !== id);
       }, delay);
       scheduledIds.push(id);
@@ -85,51 +149,48 @@ function scheduleAll() {
 
 function fireNotification(prayer) {
   const prayerAr = PRAYER_NAMES_AR[prayer] ?? prayer;
-  self.registration.showNotification('🕌 أذان صلاة ' + prayerAr, {
+  self.registration.showNotification('🕌 حان وقت صلاة ' + prayerAr, {
     body: 'حيَّ على الصلاة • حيَّ على الفلاح',
     icon: '/icons/icon-192.png',
     badge: '/icons/icon-192.png',
     tag: 'prayer-' + prayer,
     requireInteraction: true,
+    silent: false,
     dir: 'rtl',
     lang: 'ar',
-    vibrate: [200, 100, 200, 100, 200, 100, 400],
+    vibrate: [300, 100, 300, 100, 300, 200, 500],
     data: { prayer, url: '/' },
   });
 }
 
-// Re-schedule every midnight so we stay in sync for the new day
+// ── Midnight refresh ─────────────────────────────────────────────────────────
+
 function scheduleMidnightRefresh() {
   if (midnightId) clearTimeout(midnightId);
   const now = new Date();
   const midnight = new Date(now);
-  midnight.setHours(24, 1, 0, 0); // 00:01 next day
+  midnight.setHours(24, 1, 0, 0);
   const delay = midnight.getTime() - now.getTime();
-  midnightId = setTimeout(() => {
-    // Ask clients to resend today's prayer data
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      list.forEach(c => { try { c.postMessage({ type: 'REQUEST_PRAYER_DATA' }); } catch {} });
-    });
-    // If no clients reply within 5s, clear schedule (will reschedule when app opens)
-    setTimeout(() => {
-      if (scheduledIds.length === 0) {
-        // no data received, nothing to do
-      }
-    }, 5000);
+
+  midnightId = setTimeout(async () => {
+    // Clear old schedule (yesterday's times)
+    clearScheduled();
+    // Ask open pages to resend fresh today's data
+    const list = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    list.forEach(c => { try { c.postMessage({ type: 'REQUEST_PRAYER_DATA' }); } catch {} });
     scheduleMidnightRefresh();
   }, delay);
 }
 
+// ── Notification click ────────────────────────────────────────────────────────
+
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) ? e.notification.data.url : '/';
+  const url = e.notification.data?.url ?? '/';
   e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        if ('focus' in client) {
-          client.focus();
-          return;
-        }
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) {
+        if ('focus' in c) { c.focus(); return; }
       }
       if (clients.openWindow) return clients.openWindow(url);
     })
