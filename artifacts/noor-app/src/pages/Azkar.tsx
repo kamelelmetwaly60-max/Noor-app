@@ -42,7 +42,6 @@ function IslamicCard({ children, isDone, className = '' }: { children: React.Rea
         className
       )}
     >
-      {/* Islamic corner ornaments */}
       <svg className="absolute top-2 right-2 w-8 h-8 opacity-10 text-[#C19A6B]" viewBox="0 0 40 40" fill="currentColor">
         <path d="M0,0 L20,0 L20,5 L5,5 L5,20 L0,20 Z"/>
         <circle cx="18" cy="18" r="4" fill="none" stroke="currentColor" strokeWidth="1.5"/>
@@ -64,8 +63,52 @@ function IslamicCard({ children, isDone, className = '' }: { children: React.Rea
   );
 }
 
+function ResetConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" dir="rtl">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+      <motion.div
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="relative bg-card border border-border rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center"
+      >
+        <svg width="32" height="32" viewBox="0 0 40 40" className="mx-auto mb-3 text-primary opacity-60">
+          <polygon points="20,2 24,14 37,14 27,22 31,35 20,27 9,35 13,22 3,14 16,14" fill="currentColor"/>
+        </svg>
+        <h3 className="font-bold text-lg mb-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>تصفير الأذكار</h3>
+        <p className="text-muted-foreground text-sm mb-5" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+          هل تريد تصفير هذا القسم لليوم؟
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-2xl bg-secondary text-foreground font-bold text-sm hover:bg-secondary/80 transition-colors"
+            style={{ fontFamily: '"Tajawal", sans-serif' }}
+          >
+            إلغاء
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3 rounded-2xl font-bold text-sm transition-colors"
+            style={{
+              background: 'linear-gradient(135deg, #C19A6B, #a07a4a)',
+              color: '#fff',
+              fontFamily: '"Tajawal", sans-serif',
+            }}
+          >
+            تصفير
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export function Azkar() {
   const [tab, setTab] = useState<TabId>('morning');
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const todayKey = getTodayKey();
   const [progress, setProgress] = useLocalStorage<Record<string, number>>(`azkar_${todayKey}`, {});
 
@@ -84,23 +127,34 @@ export function Azkar() {
     if ('vibrate' in navigator) navigator.vibrate(10);
   };
 
-  const resetToday = () => {
-    if (confirm('هل تريد تصفير هذا القسم لليوم؟')) {
-      const toRemove = azkarList.map(z => z.id);
-      setProgress(prev => {
-        const next = { ...prev };
-        toRemove.forEach(id => delete next[id]);
-        return next;
-      });
-    }
+  const handleResetConfirm = () => {
+    const toRemove = azkarList.map(z => z.id);
+    setProgress(prev => {
+      const next = { ...prev };
+      toRemove.forEach(id => delete next[id]);
+      return next;
+    });
+    setShowResetDialog(false);
   };
 
   return (
     <div className="pb-24 pt-4 px-4 max-w-lg mx-auto" dir="rtl">
+      <AnimatePresence>
+        {showResetDialog && (
+          <ResetConfirmDialog
+            onConfirm={handleResetConfirm}
+            onCancel={() => setShowResetDialog(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex justify-between items-center mb-3">
         <h1 className="text-2xl font-bold" style={{ fontFamily: '"Tajawal", sans-serif' }}>الأذكار والأدعية</h1>
-        <button onClick={resetToday} className="p-2 bg-secondary text-primary rounded-full hover:bg-primary/20 transition-colors">
+        <button
+          onClick={() => setShowResetDialog(true)}
+          className="p-2 bg-secondary text-primary rounded-full hover:bg-primary/20 transition-colors"
+        >
           <RotateCcw className="w-5 h-5" />
         </button>
       </div>
@@ -168,12 +222,10 @@ export function Azkar() {
                 transition={{ delay: index * 0.02, duration: 0.25 }}
               >
                 <IslamicCard isDone={isDone}>
-                  {/* Top ornament */}
                   <div className="text-[#C19A6B] mb-3">
                     <IslamicOrnament />
                   </div>
 
-                  {/* Zekr text */}
                   <p
                     className="text-lg leading-loose mb-1 whitespace-pre-wrap text-center"
                     style={{ fontFamily: '"Amiri Quran", "Amiri", "Scheherazade New", serif' }}
@@ -181,7 +233,6 @@ export function Azkar() {
                     {zekr.text}
                   </p>
 
-                  {/* Bottom ornament */}
                   <div className="text-[#C19A6B] mt-2 mb-3">
                     <IslamicOrnament />
                   </div>

@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { Link } from 'wouter';
 import { Compass, Book, Mic, Moon, Sun, ChevronLeft, Zap, LogOut } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { motion, AnimatePresence } from 'framer-motion';
+import { firebaseSignOut } from '@/lib/firebase';
 
 function IslamicPattern() {
   return (
@@ -17,8 +20,48 @@ function IslamicPattern() {
   );
 }
 
+function LogoutConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" dir="rtl">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+      <motion.div
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="relative bg-card border border-border rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center"
+      >
+        <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+          <LogOut className="w-7 h-7 text-red-500" />
+        </div>
+        <h3 className="font-bold text-lg mb-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>تسجيل الخروج</h3>
+        <p className="text-muted-foreground text-sm mb-5" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+          هل تريد تسجيل الخروج وتغيير بياناتك؟
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-2xl bg-secondary text-foreground font-bold text-sm hover:bg-secondary/80 transition-colors"
+            style={{ fontFamily: '"Tajawal", sans-serif' }}
+          >
+            إلغاء
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors"
+            style={{ fontFamily: '"Tajawal", sans-serif' }}
+          >
+            خروج
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export function MoreMenu() {
   const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -26,11 +69,10 @@ export function MoreMenu() {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  const handleLogout = () => {
-    if (confirm('هل تريد تسجيل الخروج وتغيير بياناتك؟')) {
-      localStorage.removeItem('user_profile');
-      window.location.reload();
-    }
+  const handleLogoutConfirm = async () => {
+    await firebaseSignOut();
+    localStorage.removeItem('user_profile');
+    window.location.reload();
   };
 
   const userProfileRaw = localStorage.getItem('user_profile');
@@ -45,6 +87,15 @@ export function MoreMenu() {
 
   return (
     <div className="pb-24 pt-6 px-4 max-w-lg mx-auto" dir="rtl">
+      <AnimatePresence>
+        {showLogoutDialog && (
+          <LogoutConfirmDialog
+            onConfirm={handleLogoutConfirm}
+            onCancel={() => setShowLogoutDialog(false)}
+          />
+        )}
+      </AnimatePresence>
+
       <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>المزيد</h1>
 
       {/* User profile card */}
@@ -65,7 +116,11 @@ export function MoreMenu() {
               <p className="text-xs text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>{userProfile.governorateName}</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="p-2 bg-secondary rounded-full text-muted-foreground hover:text-destructive transition-colors" title="تغيير البيانات">
+          <button
+            onClick={() => setShowLogoutDialog(true)}
+            className="p-2 bg-secondary rounded-full text-muted-foreground hover:text-destructive transition-colors"
+            title="تغيير البيانات"
+          >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
@@ -116,7 +171,6 @@ export function MoreMenu() {
 
       {/* About App Section */}
       <div className="mt-8 bg-card border border-primary/15 rounded-3xl overflow-hidden shadow-sm">
-        {/* Decorative top */}
         <div className="bg-gradient-to-l from-primary/10 to-primary/5 px-5 pt-5 pb-3">
           <IslamicPattern />
           <div className="text-center mt-1">
@@ -127,7 +181,6 @@ export function MoreMenu() {
         </div>
 
         <div className="px-5 pb-5 space-y-4">
-          {/* App description */}
           <div className="pt-4 border-t border-border/30">
             <h3 className="font-bold text-base text-primary mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>عن التطبيق</h3>
             <p className="text-sm text-foreground/80 leading-loose" style={{ fontFamily: '"Tajawal", sans-serif' }}>
@@ -135,7 +188,6 @@ export function MoreMenu() {
             </p>
           </div>
 
-          {/* Features */}
           <div>
             <h3 className="font-bold text-sm text-primary mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>مميزات التطبيق</h3>
             <div className="grid grid-cols-2 gap-2">
@@ -159,7 +211,6 @@ export function MoreMenu() {
             </div>
           </div>
 
-          {/* Technical info */}
           <div className="border-t border-border/30 pt-3 space-y-1">
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>مصادر البيانات</span>
@@ -175,7 +226,6 @@ export function MoreMenu() {
             </div>
           </div>
 
-          {/* Developer info */}
           <div className="border-t border-border/30 pt-3 text-center">
             <p className="text-foreground/80 text-sm font-bold" style={{ fontFamily: '"Tajawal", sans-serif' }}>تصميم وتطوير</p>
             <p className="text-primary font-bold text-base mt-0.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>سيف كامل</p>
