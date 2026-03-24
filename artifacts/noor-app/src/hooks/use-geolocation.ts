@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 
-export function useGeolocation() {
+export function useGeolocation(autoRequest = true) {
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(autoRequest);
 
   const requestLocation = () => {
     setIsLoading(true);
+    setError(null);
     if (!navigator.geolocation) {
       setError("خدمة الموقع غير مدعومة في متصفحك");
       setIsLoading(false);
@@ -22,7 +23,7 @@ export function useGeolocation() {
         setError(null);
         setIsLoading(false);
       },
-      (err) => {
+      () => {
         setError("لم نتمكن من تحديد موقعك. يرجى تفعيل الموقع.");
         setIsLoading(false);
       },
@@ -31,8 +32,8 @@ export function useGeolocation() {
   };
 
   useEffect(() => {
-    // Attempt automatically on mount
-    requestLocation();
+    if (autoRequest) requestLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { coords, error, isLoading, requestLocation };
@@ -48,9 +49,9 @@ export function calculateQibla(lat: number, lng: number): number {
 
   const y = Math.sin(lngDiffRad);
   const x = Math.cos(latRad) * Math.tan(makkahLatRad) - Math.sin(latRad) * Math.cos(lngDiffRad);
-  
-  let qiblaRad = Math.atan2(y, x);
-  let qiblaDeg = (qiblaRad * 180) / Math.PI;
-  
+
+  const qiblaRad = Math.atan2(y, x);
+  const qiblaDeg = (qiblaRad * 180) / Math.PI;
+
   return (qiblaDeg + 360) % 360;
 }

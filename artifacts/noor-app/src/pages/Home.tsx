@@ -177,6 +177,13 @@ export function Home() {
     ? `${hijri.day} ${hijri.month?.ar ?? ''} ${hijri.year} هـ`
     : new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }).format(displayDate);
 
+  const displayGregorianLabel = new Intl.DateTimeFormat('ar-EG', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(displayDate);
+
   return (
     <div className="pb-24 pt-6 px-4 max-w-lg mx-auto space-y-5" dir="rtl">
       <AnimatePresence>
@@ -196,15 +203,19 @@ export function Home() {
 
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* Hijri date with navigation */}
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-0.5">
             <button onClick={() => setDateOffset(d => d - 1)} className="p-1.5 bg-white/15 rounded-full hover:bg-white/25 transition-colors">
               <ChevronRight className="w-4 h-4" />
             </button>
-            <p className="text-primary-foreground/90 font-medium text-sm" style={{ fontFamily: '"Tajawal", sans-serif' }}>{displayHijriLabel}</p>
+            <p className="text-primary-foreground/90 font-bold text-sm" style={{ fontFamily: '"Tajawal", sans-serif' }}>{displayHijriLabel}</p>
             <button onClick={() => setDateOffset(d => d + 1)} className="p-1.5 bg-white/15 rounded-full hover:bg-white/25 transition-colors">
               <ChevronLeft className="w-4 h-4" />
             </button>
           </div>
+          {/* Gregorian date */}
+          <p className="text-primary-foreground/55 text-xs mb-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+            {displayGregorianLabel}
+          </p>
           {dateOffset !== 0 && (
             <button onClick={() => setDateOffset(0)} className="text-xs text-white/60 underline mb-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>
               {dateOffset > 0 ? `+${dateOffset} أيام` : `${dateOffset} أيام`} — العودة لليوم
