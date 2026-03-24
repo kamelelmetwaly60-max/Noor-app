@@ -140,7 +140,7 @@ function FlagImg({ code, className = '', style = {} }: { code: string | null; cl
 }
 
 // Beautiful Islamic geometric disc for the player
-function IslamicDisc({ isPlaying }: { isPlaying?: boolean }) {
+function IslamicDisc({ isPlaying, surahName }: { isPlaying?: boolean; surahName?: string }) {
   const star8 = Array.from({ length: 16 }, (_, i) => {
     const r = i % 2 === 0 ? 62 : 36;
     const angle = (i * 22.5 - 90) * Math.PI / 180;
@@ -240,11 +240,23 @@ function IslamicDisc({ isPlaying }: { isPlaying?: boolean }) {
         );
       })}
 
-      {/* "ق" in Arabic at center */}
-      <text x="100" y="107" textAnchor="middle" dominantBaseline="middle"
-        style={{ fontFamily: '"Amiri Quran", "Amiri", serif', fontSize: '24px', fill: '#d4b483', fontWeight: 'bold' }}>
-        ق
-      </text>
+      {/* Surah name in center */}
+      {surahName ? (
+        <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+          style={{
+            fontFamily: '"Amiri Quran", "Amiri", serif',
+            fontSize: surahName.length <= 3 ? '16px' : surahName.length <= 5 ? '13px' : '11px',
+            fill: '#d4b483',
+            fontWeight: 'bold',
+          }}>
+          {surahName}
+        </text>
+      ) : (
+        <text x="100" y="107" textAnchor="middle" dominantBaseline="middle"
+          style={{ fontFamily: '"Amiri Quran", "Amiri", serif', fontSize: '24px', fill: '#d4b483', fontWeight: 'bold' }}>
+          ق
+        </text>
+      )}
 
       {/* Center dot */}
       <circle cx="100" cy="100" r="5" fill="#C19A6B" opacity="0.9" />
@@ -453,7 +465,7 @@ export function Reciters() {
       <div className="flex-1 flex flex-col items-center justify-center px-8 gap-6">
         <div className="relative" style={{ width: 220, height: 220 }}>
           <div className="w-full h-full rounded-full overflow-hidden" style={{ boxShadow: '0 8px 50px rgba(193,154,107,0.35), 0 0 0 2px rgba(193,154,107,0.2)' }}>
-            <IslamicDisc isPlaying={audio.isPlaying} />
+            <IslamicDisc isPlaying={audio.isPlaying} surahName={audio.surahName} />
           </div>
           {/* Reflection glow */}
           <div className="absolute inset-0 rounded-full pointer-events-none" style={{ background: 'radial-gradient(ellipse at 35% 25%, rgba(193,154,107,0.08) 0%, transparent 60%)' }} />

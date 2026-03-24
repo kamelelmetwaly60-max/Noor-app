@@ -12,15 +12,14 @@ function getWordAudioUrl(surah: number, ayah: number, wordIdx: number): string {
   return `https://audio.qurancdn.com/wbw/${padZero(surah, 3)}_${padZero(ayah, 3)}_${padZero(wordIdx, 3)}.mp3`;
 }
 
-// Ornamental ayah end marker — dark gold style
-function AyahMarker({ num, bookmarked }: { num: number; bookmarked?: boolean }) {
+function AyahMarker({ num, bookmarked, dark }: { num: number; bookmarked?: boolean; dark: boolean }) {
   return (
     <span className="inline-block align-middle mx-1" style={{ direction: 'ltr', unicodeBidi: 'embed' }}>
       <svg width="28" height="28" viewBox="0 0 100 100" style={{ display: 'inline', verticalAlign: 'middle' }}>
-        <circle cx="50" cy="50" r="46" fill="none" stroke={bookmarked ? '#C19A6B' : '#7a5c2a'} strokeWidth="2.5" />
-        <circle cx="50" cy="50" r="38" fill={bookmarked ? 'rgba(193,154,107,0.25)' : 'rgba(193,154,107,0.08)'} stroke={bookmarked ? '#C19A6B' : '#5a3e18'} strokeWidth="1.5" />
+        <circle cx="50" cy="50" r="46" fill="none" stroke={bookmarked ? '#C19A6B' : dark ? '#7a5c2a' : '#C19A6B'} strokeWidth="2.5" />
+        <circle cx="50" cy="50" r="38" fill={bookmarked ? 'rgba(193,154,107,0.25)' : 'rgba(193,154,107,0.08)'} stroke={bookmarked ? '#C19A6B' : dark ? '#5a3e18' : 'rgba(193,154,107,0.5)'} strokeWidth="1.5" />
         <text x="50" y="56" textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize: num > 99 ? '28px' : '32px', fill: bookmarked ? '#C19A6B' : '#c9a96e', fontFamily: 'serif', fontWeight: 'bold' }}>
+          style={{ fontSize: num > 99 ? '28px' : '32px', fill: bookmarked ? '#C19A6B' : dark ? '#c9a96e' : '#8B5E3C', fontFamily: 'serif', fontWeight: 'bold' }}>
           {num}
         </text>
       </svg>
@@ -30,6 +29,9 @@ function AyahMarker({ num, bookmarked }: { num: number; bookmarked?: boolean }) 
 
 export function Quran() {
   const { data: surahs, isLoading: loadingList } = useQuranSurahs();
+  const [theme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
+  const dark = theme === 'dark';
+
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
   const [scrollToAyah, setScrollToAyah] = useState<number | null>(null);
   const [search, setSearch] = useState('');
@@ -47,6 +49,40 @@ export function Quran() {
   const { data: tafsirData } = useTafsir(selectedSurah ?? 0, activeAyah ?? 0);
 
   const [bookmark, setBookmark] = useLocalStorage<{ surah: number; ayah: number } | null>('quran_bookmark', null);
+
+  // Theme-dependent color palette
+  const C = {
+    pageBg: dark ? '#0f0c07' : '#FDFBF5',
+    headerBg: dark ? '#130f08' : '#F7EDD6',
+    headerBorder: dark ? 'rgba(193,154,107,0.2)' : 'rgba(193,154,107,0.35)',
+    headerShadow: dark ? '0 2px 12px rgba(0,0,0,0.4)' : '0 2px 12px rgba(193,154,107,0.15)',
+    mushafBg: dark
+      ? 'linear-gradient(180deg, #1c1408 0%, #160f06 100%)'
+      : 'linear-gradient(180deg, #FFFDF4 0%, #F8EFDB 100%)',
+    mushafBorder: dark ? 'rgba(193,154,107,0.3)' : 'rgba(193,154,107,0.45)',
+    mushafShadow: dark
+      ? '0 0 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(193,154,107,0.15)'
+      : '0 0 20px rgba(193,154,107,0.2), inset 0 1px 0 rgba(193,154,107,0.3)',
+    ayahText: dark ? '#ddd0b0' : '#2C1E16',
+    surahTitle: dark ? '#d4b483' : '#7a4e25',
+    bismillah: dark ? '#b89050' : '#8B5E3C',
+    searchBg: dark ? 'rgba(193,154,107,0.08)' : 'rgba(193,154,107,0.1)',
+    searchText: dark ? '#e8d9b8' : '#2C1E16',
+    searchBorder: dark ? 'rgba(193,154,107,0.25)' : 'rgba(193,154,107,0.4)',
+    itemBg: dark ? 'rgba(193,154,107,0.06)' : 'rgba(193,154,107,0.08)',
+    itemBorder: dark ? 'rgba(193,154,107,0.15)' : 'rgba(193,154,107,0.25)',
+    itemText: dark ? '#e8d9b8' : '#2C1E16',
+    subtleText: dark ? 'rgba(193,154,107,0.6)' : '#8B5E3C',
+    modalBg: dark ? '#1a1208' : '#FFFDF4',
+    modalBorder: dark ? 'rgba(193,154,107,0.3)' : 'rgba(193,154,107,0.4)',
+    modalText: dark ? '#ddd0b0' : '#2C1E16',
+    hinBg: dark ? 'rgba(193,154,107,0.08)' : 'rgba(193,154,107,0.1)',
+    hintBorder: dark ? 'rgba(193,154,107,0.15)' : 'rgba(193,154,107,0.25)',
+    btnBg: dark ? 'rgba(193,154,107,0.12)' : 'rgba(193,154,107,0.15)',
+    btnBorder: dark ? 'rgba(193,154,107,0.25)' : 'rgba(193,154,107,0.4)',
+    bookmarkBg: dark ? 'rgba(193,154,107,0.12)' : 'rgba(193,154,107,0.12)',
+    bookmarkBorder: dark ? 'rgba(193,154,107,0.35)' : 'rgba(193,154,107,0.5)',
+  };
 
   useEffect(() => {
     if (!wordAudioRef.current) {
@@ -106,7 +142,6 @@ export function Quran() {
     }
   };
 
-  // Reset Juz/Hizb when surah changes
   useEffect(() => {
     setCurrentJuz(null);
     setCurrentHizb(null);
@@ -146,10 +181,10 @@ export function Quran() {
       <div
         className="pb-24 pt-6 px-4 max-w-lg mx-auto h-screen flex flex-col"
         dir="rtl"
-        style={{ background: 'linear-gradient(180deg, #0f0c07 0%, #130f08 100%)' }}
+        style={{ background: C.pageBg }}
       >
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.3)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}` }}>
             <svg width="18" height="18" viewBox="0 0 40 40" fill="#C19A6B"><polygon points="20,2 24,14 37,14 27,22 31,35 20,27 9,35 13,22 3,14 16,14" /></svg>
           </div>
           <h1 className="text-2xl font-bold" style={{ fontFamily: '"Tajawal", sans-serif', color: '#C19A6B' }}>القرآن الكريم</h1>
@@ -164,9 +199,9 @@ export function Quran() {
             onChange={e => setSearch(e.target.value)}
             className="w-full py-3 pr-10 pl-4 rounded-2xl outline-none text-sm"
             style={{
-              background: 'rgba(193,154,107,0.08)',
-              border: '1px solid rgba(193,154,107,0.25)',
-              color: '#e8d9b8',
+              background: C.searchBg,
+              border: `1px solid ${C.searchBorder}`,
+              color: C.searchText,
               fontFamily: '"Tajawal", sans-serif',
             }}
           />
@@ -176,13 +211,13 @@ export function Quran() {
           <button
             onClick={() => { setSelectedSurah(bookmark.surah); setScrollToAyah(bookmark.ayah); }}
             className="mb-4 p-4 rounded-2xl flex items-center justify-between transition-all"
-            style={{ background: 'rgba(193,154,107,0.12)', border: '1px solid rgba(193,154,107,0.35)' }}
+            style={{ background: C.bookmarkBg, border: `1px solid ${C.bookmarkBorder}` }}
           >
             <div className="text-right">
               <p className="text-xs mb-1 flex items-center gap-1" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>
                 <Bookmark className="w-3.5 h-3.5 fill-current" /> علامة محفوظة
               </p>
-              <p className="font-bold text-sm" style={{ color: '#e8d9b8', fontFamily: '"Tajawal", sans-serif' }}>
+              <p className="font-bold text-sm" style={{ color: C.itemText, fontFamily: '"Tajawal", sans-serif' }}>
                 سورة {SURAH_NAMES[bookmark.surah]} — الآية {bookmark.ayah}
               </p>
             </div>
@@ -199,7 +234,7 @@ export function Quran() {
                 key={s.number}
                 onClick={() => { setSelectedSurah(s.number); setMode('normal'); setSelectedAyah(null); setActiveAyah(null); }}
                 className="w-full p-4 rounded-2xl flex items-center justify-between transition-all"
-                style={{ background: 'rgba(193,154,107,0.06)', border: '1px solid rgba(193,154,107,0.15)' }}
+                style={{ background: C.itemBg, border: `1px solid ${C.itemBorder}` }}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
@@ -207,8 +242,8 @@ export function Quran() {
                     {s.number}
                   </div>
                   <div className="text-right">
-                    <h3 className="font-bold text-base" style={{ fontFamily: '"Amiri", serif', color: '#e8d9b8' }}>{SURAH_NAMES[s.number] ?? s.name}</h3>
-                    <p className="text-xs mt-0.5" style={{ color: 'rgba(193,154,107,0.6)', fontFamily: '"Tajawal", sans-serif' }}>
+                    <h3 className="font-bold text-base" style={{ fontFamily: '"Amiri", serif', color: C.itemText }}>{SURAH_NAMES[s.number] ?? s.name}</h3>
+                    <p className="text-xs mt-0.5" style={{ color: C.subtleText, fontFamily: '"Tajawal", sans-serif' }}>
                       {s.revelationType === 'Meccan' ? 'مكية' : 'مدنية'} • {s.numberOfAyahs} آية
                     </p>
                   </div>
@@ -229,35 +264,34 @@ export function Quran() {
     : '';
 
   return (
-    <div className="h-screen flex flex-col relative" dir="rtl" style={{ background: '#0f0c07' }}>
+    <div className="h-screen flex flex-col relative" dir="rtl" style={{ background: C.pageBg }}>
       {/* ── Header ── */}
       <div
         className="px-4 py-3 flex items-center justify-between z-10 flex-shrink-0"
-        style={{ background: '#130f08', borderBottom: '1px solid rgba(193,154,107,0.2)', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
+        style={{ background: C.headerBg, borderBottom: `1px solid ${C.headerBorder}`, boxShadow: C.headerShadow }}
       >
         <button
           onClick={() => { setSelectedSurah(null); setMode('normal'); setSelectedAyah(null); setActiveAyah(null); wordAudioRef.current?.pause(); }}
           className="p-2 rounded-full"
-          style={{ background: 'rgba(193,154,107,0.12)', border: '1px solid rgba(193,154,107,0.25)' }}
+          style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}` }}
         >
           <X className="w-4 h-4" style={{ color: '#C19A6B' }} />
         </button>
 
         <div className="text-center flex-1 px-2">
-          <h2 className="font-bold text-base" style={{ fontFamily: '"Amiri", serif', color: '#e8d9b8' }}>{surahName}</h2>
-          <p className="text-xs" style={{ color: 'rgba(193,154,107,0.7)', fontFamily: '"Tajawal", sans-serif' }}>
+          <h2 className="font-bold text-base" style={{ fontFamily: '"Amiri", serif', color: C.surahTitle }}>{surahName}</h2>
+          <p className="text-xs" style={{ color: C.subtleText, fontFamily: '"Tajawal", sans-serif' }}>
             الجزء {currentJuz ?? surahData?.ayahs?.[0]?.juz ?? '—'}
             {hizbDisplay ? ` • ${hizbDisplay}` : ''}
           </p>
         </div>
 
         <div className="flex gap-1.5 items-center">
-          {/* Bookmark jump button */}
           {bookmark && (
             <button
               onClick={goToBookmark}
               className="p-2 rounded-full relative"
-              style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.35)' }}
+              style={{ background: 'rgba(193,154,107,0.15)', border: `1px solid ${C.bookmarkBorder}` }}
               title="انتقل للعلامة المحفوظة"
             >
               <Bookmark className="w-4 h-4 fill-current" style={{ color: '#C19A6B' }} />
@@ -267,8 +301,8 @@ export function Quran() {
             onClick={() => { setMode(mode === 'listen' ? 'normal' : 'listen'); setSelectedAyah(null); }}
             className="p-2 rounded-full transition-all"
             style={{
-              background: mode === 'listen' ? '#C19A6B' : 'rgba(193,154,107,0.12)',
-              border: '1px solid rgba(193,154,107,0.3)',
+              background: mode === 'listen' ? '#C19A6B' : C.btnBg,
+              border: `1px solid ${C.btnBorder}`,
             }}
           >
             <Headphones className="w-4 h-4" style={{ color: mode === 'listen' ? '#0f0c07' : '#C19A6B' }} />
@@ -277,8 +311,8 @@ export function Quran() {
             onClick={() => { setMode(mode === 'tafsir' ? 'normal' : 'tafsir'); setSelectedAyah(null); }}
             className="p-2 rounded-full transition-all"
             style={{
-              background: mode === 'tafsir' ? '#C19A6B' : 'rgba(193,154,107,0.12)',
-              border: '1px solid rgba(193,154,107,0.3)',
+              background: mode === 'tafsir' ? '#C19A6B' : C.btnBg,
+              border: `1px solid ${C.btnBorder}`,
             }}
           >
             <FileText className="w-4 h-4" style={{ color: mode === 'tafsir' ? '#0f0c07' : '#C19A6B' }} />
@@ -288,18 +322,18 @@ export function Quran() {
 
       {/* Mode hint */}
       {mode === 'listen' && (
-        <div className="px-4 py-2 text-center flex-shrink-0" style={{ background: 'rgba(193,154,107,0.08)', borderBottom: '1px solid rgba(193,154,107,0.15)' }}>
+        <div className="px-4 py-2 text-center flex-shrink-0" style={{ background: C.hinBg, borderBottom: `1px solid ${C.hintBorder}` }}>
           <p className="text-xs font-bold" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>👂 اضغط على أي كلمة لسماع نطقها</p>
         </div>
       )}
       {mode === 'tafsir' && (
-        <div className="px-4 py-2 text-center flex-shrink-0" style={{ background: 'rgba(193,154,107,0.08)', borderBottom: '1px solid rgba(193,154,107,0.15)' }}>
+        <div className="px-4 py-2 text-center flex-shrink-0" style={{ background: C.hinBg, borderBottom: `1px solid ${C.hintBorder}` }}>
           <p className="text-xs font-bold" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>📖 اضغط على أي آية لعرض تفسيرها</p>
         </div>
       )}
       {mode === 'normal' && (
-        <div className="px-4 py-2 text-center flex-shrink-0" style={{ background: 'rgba(193,154,107,0.05)', borderBottom: '1px solid rgba(193,154,107,0.1)' }}>
-          <p className="text-xs" style={{ color: 'rgba(193,154,107,0.5)', fontFamily: '"Tajawal", sans-serif' }}>اضغط على آية لتعيين علامة الحفظ</p>
+        <div className="px-4 py-2 text-center flex-shrink-0" style={{ background: C.hinBg, borderBottom: `1px solid ${C.hintBorder}` }}>
+          <p className="text-xs" style={{ color: C.subtleText, fontFamily: '"Tajawal", sans-serif' }}>اضغط على آية لتعيين علامة الحفظ</p>
         </div>
       )}
 
@@ -311,9 +345,9 @@ export function Quran() {
           <div
             className="rounded-2xl min-h-full overflow-hidden"
             style={{
-              background: 'linear-gradient(180deg, #1c1408 0%, #160f06 100%)',
-              border: '1px solid rgba(193,154,107,0.3)',
-              boxShadow: '0 0 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(193,154,107,0.15)',
+              background: C.mushafBg,
+              border: `1px solid ${C.mushafBorder}`,
+              boxShadow: C.mushafShadow,
             }}
           >
             {/* Top ornamental border */}
@@ -322,16 +356,16 @@ export function Quran() {
             {/* Surah name banner */}
             <div
               className="py-5 px-4 text-center"
-              style={{ borderBottom: '1px solid rgba(193,154,107,0.2)', background: 'rgba(193,154,107,0.05)' }}
+              style={{ borderBottom: `1px solid ${C.headerBorder}`, background: dark ? 'rgba(193,154,107,0.05)' : 'rgba(193,154,107,0.07)' }}
             >
               <div className="flex items-center justify-center gap-2 mb-3">
                 <div className="h-px flex-1 max-w-16" style={{ background: 'linear-gradient(to right, transparent, rgba(193,154,107,0.5))' }} />
                 <svg width="16" height="16" viewBox="0 0 100 100"><polygon points="50,5 61,35 93,35 68,57 77,88 50,70 23,88 32,57 7,35 39,35" fill="#C19A6B" opacity="0.8" /></svg>
                 <div className="h-px flex-1 max-w-16" style={{ background: 'linear-gradient(to left, transparent, rgba(193,154,107,0.5))' }} />
               </div>
-              <h2 className="text-3xl mb-2" style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: '#d4b483' }}>{surahName}</h2>
+              <h2 className="text-3xl mb-2" style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: C.surahTitle }}>{surahName}</h2>
               {selectedSurah !== 1 && selectedSurah !== 9 && (
-                <p className="text-lg mt-1" style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: '#b89050' }}>
+                <p className="text-lg mt-1" style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: C.bismillah }}>
                   بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
                 </p>
               )}
@@ -347,7 +381,7 @@ export function Quran() {
             {/* Ayah text body */}
             <div
               className="p-5 text-justify leading-[3.5rem] text-[1.75rem] relative"
-              style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: '#ddd0b0', direction: 'rtl' }}
+              style={{ fontFamily: '"Amiri Quran", "Amiri", serif', color: C.ayahText, direction: 'rtl' }}
             >
               {surahData?.ayahs?.map((ayah: any) => {
                 let text: string = ayah.text;
@@ -378,14 +412,14 @@ export function Quran() {
                             className="cursor-pointer px-0.5 rounded-sm transition-all duration-150"
                             style={{
                               background: isWordPlaying ? 'rgba(193,154,107,0.5)' : 'transparent',
-                              color: isWordPlaying ? '#fff' : undefined,
+                              color: isWordPlaying ? (dark ? '#fff' : '#2C1E16') : undefined,
                             }}
                           >
                             {word}{' '}
                           </span>
                         );
                       })}
-                      <AyahMarker num={ayah.numberInSurah} bookmarked={isBookmarked} />
+                      <AyahMarker num={ayah.numberInSurah} bookmarked={isBookmarked} dark={dark} />
                     </span>
                   );
                 }
@@ -416,7 +450,7 @@ export function Quran() {
                     }}
                   >
                     {text}
-                    <AyahMarker num={ayah.numberInSurah} bookmarked={isBookmarked} />
+                    <AyahMarker num={ayah.numberInSurah} bookmarked={isBookmarked} dark={dark} />
                     {/* Inline bookmark save button when selected */}
                     {isSelected && mode === 'normal' && (
                       <button
@@ -456,7 +490,7 @@ export function Quran() {
           <Dialog.Content
             className="fixed bottom-0 left-0 right-0 max-h-[75vh] rounded-t-3xl p-6 z-50 overflow-y-auto shadow-2xl"
             dir="rtl"
-            style={{ background: '#1a1208', border: '1px solid rgba(193,154,107,0.3)', borderBottom: 'none' }}
+            style={{ background: C.modalBg, border: `1px solid ${C.modalBorder}`, borderBottom: 'none' }}
           >
             <div className="w-12 h-1.5 rounded-full mx-auto mb-5" style={{ background: 'rgba(193,154,107,0.4)' }} />
             <Dialog.Title className="text-base font-bold mb-4" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>
@@ -464,7 +498,7 @@ export function Quran() {
             </Dialog.Title>
             <div
               className="text-lg leading-loose"
-              style={{ fontFamily: '"Amiri", serif', color: '#ddd0b0' }}
+              style={{ fontFamily: '"Amiri", serif', color: C.modalText }}
               dangerouslySetInnerHTML={{ __html: tafsirData?.text ?? 'جاري التحميل...' }}
             />
             <button

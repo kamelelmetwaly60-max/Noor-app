@@ -23,6 +23,9 @@ function fmtTime(mins: number): string {
 
 export function SpeedReader() {
   const { data: surahs } = useQuranSurahs();
+  const [theme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
+  const dark = theme === 'dark';
+
   const [selectedSurah, setSelectedSurah] = useState(1);
   const [phase, setPhase] = useState<'select' | 'read'>('select');
   const { data: surahData } = useSurah(selectedSurah);
@@ -37,6 +40,29 @@ export function SpeedReader() {
   );
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Theme palette
+  const C = {
+    pageBg: dark ? '#0a0805' : '#FDFBF5',
+    headerBg: dark ? '#0f0c07' : '#F7EDD6',
+    headerBorder: dark ? 'rgba(193,154,107,0.15)' : 'rgba(193,154,107,0.3)',
+    text: dark ? '#e8d9b8' : '#2C1E16',
+    textSecondary: dark ? 'rgba(232,217,184,0.4)' : 'rgba(44,30,22,0.4)',
+    wordDisplay: dark ? '#C19A6B' : '#7a4e25',
+    wordGlow: dark
+      ? '0 0 40px rgba(193,154,107,0.6), 0 0 80px rgba(193,154,107,0.3)'
+      : '0 0 20px rgba(193,154,107,0.3)',
+    prevNextWord: dark ? '#e8d9b8' : '#2C1E16',
+    btnBg: dark ? 'rgba(193,154,107,0.1)' : 'rgba(193,154,107,0.12)',
+    btnBorder: dark ? 'rgba(193,154,107,0.2)' : 'rgba(193,154,107,0.35)',
+    progressBg: dark ? 'rgba(193,154,107,0.1)' : 'rgba(193,154,107,0.15)',
+    statBg: dark ? 'rgba(193,154,107,0.06)' : 'rgba(193,154,107,0.08)',
+    itemBg: dark ? 'rgba(255,255,255,0.04)' : 'rgba(193,154,107,0.06)',
+    itemBorder: dark ? 'rgba(255,255,255,0.06)' : 'rgba(193,154,107,0.15)',
+    itemBgHover: dark ? 'rgba(255,255,255,0.08)' : 'rgba(193,154,107,0.1)',
+    selectedBg: 'rgba(193,154,107,0.18)',
+    selectedBorder: 'rgba(193,154,107,0.4)',
+  };
 
   // Build words array from surah data
   useEffect(() => {
@@ -103,16 +129,16 @@ export function SpeedReader() {
   // ── Phase: Surah Selection ──
   if (phase === 'select') {
     return (
-      <div className="min-h-screen bg-black flex flex-col" dir="rtl">
-        <div className="flex items-center gap-3 p-4 border-b border-white/10">
+      <div className="min-h-screen flex flex-col" dir="rtl" style={{ background: C.pageBg }}>
+        <div className="flex items-center gap-3 p-4 border-b flex-shrink-0" style={{ background: C.headerBg, borderColor: C.headerBorder }}>
           <Link href="/more">
-            <button className="p-2 bg-white/10 rounded-full text-white">
-              <ArrowLeft className="w-5 h-5" />
+            <button className="p-2 rounded-full" style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}` }}>
+              <ArrowLeft className="w-5 h-5" style={{ color: '#C19A6B' }} />
             </button>
           </Link>
           <div>
-            <h1 className="text-white font-bold text-lg">قارئ التدبر الذكي</h1>
-            <p className="text-white/40 text-xs">Word-by-Word Speed Reader</p>
+            <h1 className="font-bold text-lg" style={{ color: C.text, fontFamily: '"Tajawal", sans-serif' }}>قارئ التدبر الذكي</h1>
+            <p className="text-xs" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>قراءة كلمة بكلمة مع التدبر</p>
           </div>
         </div>
 
@@ -123,31 +149,39 @@ export function SpeedReader() {
               setPhase('read');
               setTimeout(() => setWordIndex(savedProgress.wordIndex), 500);
             }}
-            className="mx-4 mt-4 p-4 bg-[#C19A6B]/15 border border-[#C19A6B]/30 rounded-2xl flex items-center gap-3"
+            className="mx-4 mt-4 p-4 rounded-2xl flex items-center gap-3"
+            style={{ background: 'rgba(193,154,107,0.12)', border: '1px solid rgba(193,154,107,0.35)' }}
           >
-            <Bookmark className="w-5 h-5 text-[#C19A6B]" />
+            <Bookmark className="w-5 h-5" style={{ color: '#C19A6B' }} />
             <div className="text-right">
-              <p className="text-[#C19A6B] font-bold text-sm">متابعة من آخر توقف</p>
-              <p className="text-white/50 text-xs">سورة {savedProgress.surahName} - الكلمة {savedProgress.wordIndex + 1}</p>
+              <p className="font-bold text-sm" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>متابعة من آخر توقف</p>
+              <p className="text-xs" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>
+                سورة {savedProgress.surahName} - الكلمة {savedProgress.wordIndex + 1}
+              </p>
             </div>
           </button>
         )}
 
         <div className="flex-1 overflow-y-auto p-4">
-          <p className="text-white/40 text-sm mb-3">اختر سورة للبدء:</p>
-          <div className="space-y-2">
+          <p className="text-sm mb-3" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>اختر سورة للبدء:</p>
+          <div className="space-y-2 pb-6">
             {Array.from({ length: 114 }, (_, i) => i + 1).map(num => (
               <button
                 key={num}
                 onClick={() => { setSelectedSurah(num); setPhase('read'); }}
-                className={`w-full flex items-center gap-4 p-3 rounded-xl transition-colors text-right ${
-                  selectedSurah === num ? 'bg-[#C19A6B]/20 border border-[#C19A6B]/40' : 'bg-white/5 border border-white/5 hover:bg-white/10'
-                }`}
+                className="w-full flex items-center gap-4 p-3 rounded-xl transition-colors text-right"
+                style={{
+                  background: selectedSurah === num ? C.selectedBg : C.itemBg,
+                  border: `1px solid ${selectedSurah === num ? C.selectedBorder : C.itemBorder}`,
+                }}
               >
-                <span className="w-8 h-8 rounded-full bg-[#C19A6B]/20 text-[#C19A6B] flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <span className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  style={{ background: 'rgba(193,154,107,0.2)', color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>
                   {num}
                 </span>
-                <span className="text-white font-bold">{SURAH_NAMES[num] ?? `سورة ${num}`}</span>
+                <span className="font-bold" style={{ color: C.text, fontFamily: '"Amiri", serif' }}>
+                  {SURAH_NAMES[num] ?? `سورة ${num}`}
+                </span>
               </button>
             ))}
           </div>
@@ -158,83 +192,104 @@ export function SpeedReader() {
 
   // ── Phase: Reading ──
   return (
-    <div className="min-h-screen bg-black flex flex-col" dir="rtl">
+    <div className="min-h-screen flex flex-col" dir="rtl" style={{ background: C.pageBg }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-        <button onClick={() => { setPhase('select'); setIsPlaying(false); }} className="p-2 bg-white/10 rounded-full text-white">
-          <ArrowLeft className="w-5 h-5" />
+      <div className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
+        style={{ background: C.headerBg, borderColor: C.headerBorder }}>
+        <button onClick={() => { setPhase('select'); setIsPlaying(false); }} className="p-2 rounded-full"
+          style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}` }}>
+          <ArrowLeft className="w-5 h-5" style={{ color: '#C19A6B' }} />
         </button>
         <div className="text-center">
-          <p className="text-white font-bold">سورة {SURAH_NAMES[selectedSurah]}</p>
-          <p className="text-white/40 text-xs">آية {currentWord?.ayah ?? 1}</p>
+          <p className="font-bold" style={{ color: C.text, fontFamily: '"Amiri", serif' }}>سورة {SURAH_NAMES[selectedSurah]}</p>
+          <p className="text-xs" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>آية {currentWord?.ayah ?? 1}</p>
         </div>
         <button onClick={saveBookmark} title="حفظ مكاني">
-          <Bookmark className={`w-5 h-5 ${savedProgress?.surah === selectedSurah && savedProgress?.wordIndex === wordIndex ? 'text-[#C19A6B] fill-[#C19A6B]' : 'text-white/40'}`} />
+          <Bookmark
+            className="w-5 h-5"
+            style={{
+              color: savedProgress?.surah === selectedSurah && savedProgress?.wordIndex === wordIndex ? '#C19A6B' : C.textSecondary,
+              fill: savedProgress?.surah === selectedSurah && savedProgress?.wordIndex === wordIndex ? '#C19A6B' : 'transparent',
+            }}
+          />
         </button>
       </div>
 
       {/* Main word display */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-4 select-none">
         {/* Previous word */}
-        <div className="h-16 flex items-center opacity-20">
+        <div className="h-16 flex items-center" style={{ opacity: 0.25 }}>
           {prevWord && (
-            <span className="text-white font-serif text-2xl">{prevWord.word}</span>
+            <span style={{ color: C.prevNextWord, fontFamily: '"Amiri Quran", "Amiri", serif', fontSize: '1.5rem' }}>
+              {prevWord.word}
+            </span>
           )}
         </div>
 
-        {/* Current word - glowing */}
+        {/* Current word — glowing */}
         <div className="h-40 flex items-center justify-center">
           {currentWord ? (
             <span
-              className="font-serif text-6xl text-[#C19A6B] text-center leading-tight"
               style={{
-                textShadow: '0 0 40px rgba(193,154,107,0.6), 0 0 80px rgba(193,154,107,0.3)',
+                fontFamily: '"Amiri Quran", "Amiri", serif',
+                fontSize: '3.75rem',
+                color: C.wordDisplay,
+                textAlign: 'center',
+                lineHeight: 1.2,
+                textShadow: C.wordGlow,
                 transition: 'all 0.15s ease',
               }}
             >
               {currentWord.word}
             </span>
           ) : (
-            <span className="text-white/20 text-2xl">جاري التحميل...</span>
+            <span style={{ color: C.textSecondary, fontSize: '1.5rem', fontFamily: '"Tajawal", sans-serif' }}>
+              جاري التحميل...
+            </span>
           )}
         </div>
 
         {/* Next word */}
-        <div className="h-16 flex items-center opacity-20">
+        <div className="h-16 flex items-center" style={{ opacity: 0.25 }}>
           {nextWord && (
-            <span className="text-white font-serif text-2xl">{nextWord.word}</span>
+            <span style={{ color: C.prevNextWord, fontFamily: '"Amiri Quran", "Amiri", serif', fontSize: '1.5rem' }}>
+              {nextWord.word}
+            </span>
           )}
         </div>
       </div>
 
       {/* Status bar */}
-      <div className="px-4 py-2 grid grid-cols-3 gap-2 border-t border-white/10">
+      <div className="px-4 py-3 grid grid-cols-3 gap-2 border-t" style={{ borderColor: C.headerBorder, background: C.statBg }}>
         <div className="text-center">
-          <p className="text-white/40 text-[10px]">الكلمة</p>
-          <p className="text-white font-bold text-sm">{wordIndex + 1} / {words.length}</p>
+          <p className="text-[10px]" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>الكلمة</p>
+          <p className="font-bold text-sm" style={{ color: C.text, fontFamily: '"Tajawal", sans-serif' }}>{wordIndex + 1} / {words.length}</p>
         </div>
         <div className="text-center">
-          <p className="text-white/40 text-[10px]">باقي للسورة</p>
-          <p className="text-[#C19A6B] font-bold text-sm">{fmtTime(minsToFinishSurah)}</p>
+          <p className="text-[10px]" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>باقي للسورة</p>
+          <p className="font-bold text-sm" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>{fmtTime(minsToFinishSurah)}</p>
         </div>
         <div className="text-center">
-          <p className="text-white/40 text-[10px]">باقي للختمة</p>
-          <p className="text-white/60 font-bold text-sm">{fmtTime(minsToFinishQuran)}</p>
+          <p className="text-[10px]" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>باقي للختمة</p>
+          <p className="font-bold text-sm" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>{fmtTime(minsToFinishQuran)}</p>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-white/10">
+      <div className="h-1.5 w-full relative" style={{ background: C.progressBg }}>
         <div
-          className="h-full bg-[#C19A6B] transition-all duration-300"
-          style={{ width: words.length ? `${(wordIndex / words.length) * 100}%` : '0%' }}
+          className="absolute top-0 right-0 h-full rounded-full transition-all duration-300"
+          style={{
+            width: words.length ? `${(wordIndex / words.length) * 100}%` : '0%',
+            background: 'linear-gradient(to left, #C19A6B, #8a6a3a)',
+          }}
         />
       </div>
 
       {/* WPM Slider */}
-      <div className="px-4 pt-3 pb-2">
+      <div className="px-4 pt-3 pb-2" style={{ background: C.headerBg }}>
         <div className="flex items-center gap-3">
-          <span className="text-white/40 text-xs w-8">20</span>
+          <span className="text-xs" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>20</span>
           <input
             type="range"
             min={20}
@@ -242,48 +297,59 @@ export function SpeedReader() {
             step={10}
             value={wpm}
             onChange={e => handleWpmChange(Number(e.target.value))}
-            className="flex-1 accent-[#C19A6B] h-1 rounded-full"
+            className="flex-1 h-1 rounded-full"
+            style={{ accentColor: '#C19A6B' }}
           />
-          <span className="text-white/40 text-xs w-8 text-left">500</span>
+          <span className="text-xs" style={{ color: C.textSecondary, fontFamily: '"Tajawal", sans-serif' }}>500</span>
         </div>
-        <p className="text-center text-[#C19A6B] text-sm font-bold mt-1">{wpm} كلمة/دقيقة</p>
+        <p className="text-center font-bold mt-1" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif', fontSize: '0.9rem' }}>
+          {wpm} كلمة/دقيقة
+        </p>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center justify-center gap-4 px-4 pb-8 pt-2">
+      <div className="flex items-center justify-center gap-4 px-4 pb-8 pt-3" style={{ background: C.headerBg }}>
         <button
           onClick={() => { setWordIndex(0); if (isPlaying) startInterval(wpm); }}
-          className="p-3 bg-white/10 rounded-full text-white hover:bg-white/20"
+          className="p-3 rounded-full"
+          style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}` }}
         >
-          <ChevronFirst className="w-5 h-5" />
+          <ChevronFirst className="w-5 h-5" style={{ color: '#C19A6B' }} />
         </button>
         <button
           onClick={() => setWordIndex(i => Math.max(0, i - 1))}
-          className="p-3 bg-white/10 rounded-full text-white hover:bg-white/20"
+          className="p-3 rounded-full"
+          style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}`, opacity: wordIndex === 0 ? 0.4 : 1 }}
           disabled={wordIndex === 0}
         >
-          <SkipBack className="w-5 h-5" />
+          <SkipBack className="w-5 h-5" style={{ color: '#C19A6B' }} />
         </button>
 
         <button
           onClick={() => setIsPlaying(p => !p)}
-          className="w-16 h-16 bg-[#C19A6B] rounded-full flex items-center justify-center shadow-2xl shadow-[#C19A6B]/40 hover:scale-105 transition-transform"
+          className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+          style={{ background: 'linear-gradient(135deg, #C19A6B, #7a5020)', boxShadow: '0 4px 20px rgba(193,154,107,0.4)' }}
         >
-          {isPlaying ? <Pause className="w-7 h-7 text-black" /> : <Play className="w-7 h-7 text-black translate-x-0.5" />}
+          {isPlaying
+            ? <Pause className="w-7 h-7" style={{ color: '#0f0c07' }} />
+            : <Play className="w-7 h-7 translate-x-0.5" style={{ color: '#0f0c07' }} />
+          }
         </button>
 
         <button
           onClick={() => setWordIndex(i => Math.min(words.length - 1, i + 1))}
-          className="p-3 bg-white/10 rounded-full text-white hover:bg-white/20"
+          className="p-3 rounded-full"
+          style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}`, opacity: wordIndex >= words.length - 1 ? 0.4 : 1 }}
           disabled={wordIndex >= words.length - 1}
         >
-          <SkipForward className="w-5 h-5" />
+          <SkipForward className="w-5 h-5" style={{ color: '#C19A6B' }} />
         </button>
         <button
           onClick={() => { setWordIndex(words.length - 1); setIsPlaying(false); }}
-          className="p-3 bg-white/10 rounded-full text-white hover:bg-white/20"
+          className="p-3 rounded-full"
+          style={{ background: C.btnBg, border: `1px solid ${C.btnBorder}` }}
         >
-          <ChevronLast className="w-5 h-5" />
+          <ChevronLast className="w-5 h-5" style={{ color: '#C19A6B' }} />
         </button>
       </div>
     </div>
