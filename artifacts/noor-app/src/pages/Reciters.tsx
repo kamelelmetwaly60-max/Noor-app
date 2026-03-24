@@ -19,7 +19,7 @@ const SURAH_AYAHS: Record<number, number> = {
   105:5,106:4,107:7,108:3,109:6,110:3,111:5,112:4,113:5,114:6,
 };
 
-// Country → ISO 2-letter code (lowercase, for flagcdn.com)
+// Country name → ISO 2-letter code (lowercase, for flagcdn.com)
 const COUNTRY_CODES: Record<string, string> = {
   'مصر': 'eg', 'EG': 'eg', 'Egypt': 'eg',
   'المملكة العربية السعودية': 'sa', 'السعودية': 'sa', 'SA': 'sa', 'Saudi Arabia': 'sa',
@@ -56,62 +56,113 @@ const COUNTRY_CODES: Record<string, string> = {
   'الولايات المتحدة': 'us', 'US': 'us', 'USA': 'us', 'United States': 'us',
   'بريطانيا': 'gb', 'GB': 'gb', 'United Kingdom': 'gb',
   'فرنسا': 'fr', 'FR': 'fr', 'France': 'fr',
+  'غينيا': 'gn', 'Guinea': 'gn',
+  'روسيا': 'ru', 'Russia': 'ru',
+  'ميانمار': 'mm', 'Myanmar': 'mm',
+  'أفغانستان': 'af', 'Afghanistan': 'af',
+  'قيرغيزستان': 'kg', 'Kyrgyzstan': 'kg',
 };
 
-// Reciter name → ISO code (for reciters the API doesn't give a country for)
-const RECITER_CODES: Record<string, string> = {
+// Reciter ID → ISO 2-letter code — verified for all 238 reciters from mp3quran.net
+const RECITER_ID_CODES: Record<number, string> = {
   // السعودية
-  'عبدالرحمن السديس': 'sa', 'سعود الشريم': 'sa', 'ماهر المعيقلي': 'sa',
-  'أحمد العجمي': 'sa', 'أحمد بن علي العجمي': 'sa', 'سعد الغامدي': 'sa',
-  'ياسر الدوسري': 'sa', 'أبو بكر الشاطري': 'sa', 'محمد أيوب': 'sa',
-  'علي الحذيفي': 'sa', 'إبراهيم الأخضر': 'sa', 'هاني الرفاعي': 'sa',
-  'نبيل الرفاعي': 'sa', 'خالد القحطاني': 'sa', 'إبراهيم الجبرين': 'sa',
-  'عبدالله عواد الجهني': 'sa', 'بندر بليلة': 'sa', 'صالح الصاهود': 'sa',
-  'عبدالله بصفر': 'sa', 'فهد الكندري': 'kw', 'عبدالله البريمي': 'sa',
-  'راشد الزهراني': 'sa', 'عمر السبيعي': 'sa', 'أحمد الحواشي': 'sa',
-  'أحمد خضر': 'sa', 'حسن سالم': 'sa', 'سعود بن إبراهيم الشريم': 'sa',
-  'يوسف الشويعي': 'sa', 'إبراهيم السعدان': 'sa',
-  // الكويت
-  'مشاري العفاسي': 'kw', 'مشاري بن راشد العفاسي': 'kw', 'ناصر القطامي': 'kw',
-  'عبدالعزيز الأحمد': 'kw', 'عبدالله الكندري': 'kw',
+  1: 'sa', 2: 'sa', 3: 'sa', 4: 'sa', 5: 'sa', 6: 'sa',
+  19: 'sa', 20: 'sa', 21: 'sa', 23: 'sa', 29: 'sa', 30: 'sa',
+  31: 'sa', 32: 'sa', 34: 'sa', 35: 'sa', 40: 'sa', 41: 'sa',
+  42: 'sa', 43: 'sa', 49: 'sa', 54: 'sa', 56: 'sa', 57: 'sa',
+  58: 'sa', 59: 'sa', 60: 'sa', 61: 'sa', 62: 'sa', 66: 'sa',
+  67: 'sa', 68: 'sa', 69: 'sa', 73: 'sa', 74: 'sa', 76: 'sa',
+  79: 'sa', 82: 'sa', 85: 'sa', 87: 'sa', 88: 'sa', 89: 'sa',
+  91: 'sa', 92: 'sa', 93: 'sa', 97: 'sa', 102: 'sa', 105: 'sa',
+  107: 'sa', 108: 'sa', 109: 'sa', 110: 'sa', 116: 'sa', 135: 'sa',
+  136: 'sa', 139: 'sa', 160: 'sa', 162: 'sa', 164: 'sa', 165: 'sa',
+  166: 'sa', 167: 'sa', 178: 'sa', 181: 'sa', 197: 'sa', 198: 'sa',
+  204: 'sa', 205: 'sa', 212: 'sa', 217: 'sa', 218: 'sa', 226: 'sa',
+  230: 'sa', 236: 'sa', 240: 'sa', 243: 'sa', 244: 'sa', 245: 'sa',
+  247: 'sa', 250: 'sa', 251: 'sa', 252: 'sa', 254: 'sa', 255: 'sa',
+  257: 'sa', 259: 'sa', 260: 'sa', 263: 'sa', 285: 'sa', 290: 'sa',
+  300: 'sa', 303: 'sa', 304: 'sa', 307: 'sa',
+  21136: 'sa', 21183: 'sa', 21184: 'sa', 21187: 'sa', 21188: 'sa',
+  21191: 'sa', 21193: 'sa',
   // مصر
-  'محمود خليل الحصري': 'eg', 'محمد صديق المنشاوي': 'eg', 'عبدالباسط عبدالصمد': 'eg',
-  'محمد الطبلاوي': 'eg', 'عادل ريان': 'eg', 'أيمن سويد': 'eg',
-  'محمد جبريل': 'eg', 'خالد عبدالكافي': 'eg', 'ممدوح بيومي': 'eg',
-  'محمد محمود الطبلاوي': 'eg', 'محمد إسماعيل': 'eg', 'أحمد الدباوي': 'eg',
-  'توفيق إبراهيم': 'eg', 'إسلام صبحي': 'eg',
-  // الإمارات
-  'خليفة الطنيجي': 'ae',
+  7: 'eg', 8: 'eg', 9: 'eg', 11: 'eg', 15: 'eg', 22: 'eg',
+  36: 'eg', 37: 'eg', 39: 'eg', 48: 'eg', 50: 'eg', 51: 'eg',
+  106: 'eg', 111: 'eg', 112: 'eg', 118: 'eg', 121: 'eg', 125: 'eg',
+  150: 'eg', 151: 'eg', 203: 'eg', 241: 'eg', 253: 'eg', 267: 'eg',
+  277: 'eg', 278: 'eg', 287: 'eg',
+  // الكويت
+  44: 'kw', 55: 'kw', 83: 'kw', 86: 'kw', 94: 'kw', 100: 'kw',
+  123: 'kw', 202: 'kw', 231: 'kw', 248: 'kw', 301: 'kw', 306: 'kw',
   // المغرب
-  'عمر القزابري': 'ma', 'مصطفى اللاهوني': 'ma', 'تميم الزبيدي': 'ma',
-  'سعيد الكملي': 'ma', 'إدريس أبكر': 'ma', 'يوسف الشاهدي': 'ma',
+  12: 'ma', 16: 'ma', 63: 'ma', 80: 'ma', 126: 'ma', 208: 'ma',
+  264: 'ma', 281: 'ma', 305: 'ma', 21148: 'ma', 21181: 'ma',
   // الجزائر
-  'فارس عباد': 'dz',
+  14: 'dz', 26: 'dz', 27: 'dz', 28: 'dz', 81: 'dz', 129: 'dz',
+  137: 'dz', 227: 'dz',
   // تونس
-  'يحيى حواء': 'tn',
+  96: 'tn', 163: 'tn', 201: 'tn', 207: 'tn', 265: 'tn',
+  // الإمارات
+  24: 'ae', 46: 'ae', 84: 'ae', 95: 'ae',
   // اليمن
-  'وديع اليمني': 'ye', 'أكرم العلاقمي': 'ye',
-  // لبنان
-  'توفيق الصايغ': 'lb',
-  // ليبيا
-  'خالد المهنا': 'ly',
+  10: 'ye', 219: 'ye', 225: 'ye', 246: 'ye', 21182: 'ye', 21197: 'ye',
+  // السودان
+  13: 'sd', 18: 'sd', 98: 'sd', 138: 'sd', 188: 'sd', 191: 'sd',
+  192: 'sd', 211: 'sd', 279: 'sd', 286: 'sd',
   // العراق
-  'جاسم المطوع': 'kw',
+  38: 'iq', 90: 'iq', 104: 'iq', 127: 'iq', 209: 'iq', 221: 'iq', 268: 'iq',
+  // لبنان
+  17: 'lb',
+  // ليبيا
+  159: 'ly',
+  // إندونيسيا
+  128: 'id', 153: 'id',
+  // ماليزيا
+  154: 'my', 183: 'my', 184: 'my', 185: 'my', 189: 'my',
+  // باكستان
+  64: 'pk', 71: 'pk', 206: 'pk', 216: 'pk', 229: 'pk',
+  // كندا
+  25: 'ca',
+  // سوريا
+  149: 'sy', 237: 'sy',
+  // نيجيريا
+  161: 'ng', 193: 'ng',
+  // فلسطين
+  256: 'ps', 273: 'ps', 274: 'ps',
+  // قطر
+  77: 'qa', 302: 'qa',
+  // غينيا
+  70: 'gn', 275: 'gn',
+  // الصومال
+  194: 'so',
   // الأردن
-  'خليل الحصري': 'eg',
+  152: 'jo',
+  // موريتانيا
+  47: 'mr', 115: 'mr', 134: 'mr', 190: 'mr', 271: 'mr', 280: 'mr', 284: 'mr',
+  // السنغال
+  187: 'sn', 288: 'sn',
+  // أفغانستان
+  272: 'af', 282: 'af', 283: 'af', 289: 'af',
+  // روسيا (داغستان)
+  33: 'ru',
+  // ميانمار (أراكان / الروهينغا)
+  72: 'mm', 228: 'mm',
+  // إثيوبيا
+  21186: 'et',
+  // قيرغيزستان
+  21196: 'kg',
 };
 
-function getCountryCode(country?: string, name?: string): string | null {
+function getCountryCode(country?: string, name?: string, id?: string | number): string | null {
+  // 1. Try ID-based lookup (most reliable)
+  if (id !== undefined) {
+    const numId = typeof id === 'string' ? parseInt(id) : id;
+    const code = RECITER_ID_CODES[numId];
+    if (code) return code;
+  }
+  // 2. Try country field from API
   if (country) {
     const code = COUNTRY_CODES[country] ?? COUNTRY_CODES[country.trim()];
     if (code) return code;
-  }
-  if (name) {
-    const code = RECITER_CODES[name] ?? RECITER_CODES[name.trim()];
-    if (code) return code;
-    for (const [key, c] of Object.entries(RECITER_CODES)) {
-      if (name.includes(key) || key.includes(name.split(' ')[0])) return c;
-    }
   }
   return null;
 }
@@ -350,7 +401,7 @@ export function Reciters() {
             <div className="space-y-2 pb-6">
               {filtered?.map((r: any) =>
                 (r.moshaf ?? []).filter((m: any) => !!m.server).map((moshaf: any, mi: number) => {
-                  const code = getCountryCode(r.country, r.name);
+                  const code = getCountryCode(r.country, r.name, r.id);
                   return (
                     <button
                       key={`${r.id}-${mi}`}
@@ -387,7 +438,7 @@ export function Reciters() {
 
   // ── PHASE: Surahs ────────────────────────────────────────────────────────
   if (phase === 'surahs') {
-    const code = getCountryCode(selectedReciter?.country, selectedReciter?.name);
+    const code = getCountryCode(selectedReciter?.country, selectedReciter?.name, selectedReciter?.id);
     return (
       <div className="h-screen flex flex-col max-w-lg mx-auto bg-background" dir="rtl">
         <div className="px-4 py-4 flex items-center gap-4 bg-card shadow-sm border-b border-border flex-shrink-0">
@@ -443,7 +494,7 @@ export function Reciters() {
 
   // ── PHASE: Full Player ────────────────────────────────────────────────────
   const progress = audio.duration ? audio.currentTime / audio.duration : 0;
-  const code = getCountryCode(selectedReciter?.country, selectedReciter?.name);
+  const code = getCountryCode(selectedReciter?.country, selectedReciter?.name, selectedReciter?.id);
 
   return (
     <div className="h-screen flex flex-col max-w-lg mx-auto" dir="rtl"
