@@ -154,13 +154,6 @@ export function NotificationsManager() {
   const { data: prayerResult } = usePrayerTimes(lat, lng, 0);
   const prayerTimes = prayerResult?.timings;
 
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      const t = setTimeout(() => Notification.requestPermission(), 3000);
-      return () => clearTimeout(t);
-    }
-    return undefined;
-  }, []);
 
   useEffect(() => {
     if (!audioRef.current) {

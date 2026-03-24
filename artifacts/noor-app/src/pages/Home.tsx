@@ -4,6 +4,50 @@ import { Link } from 'wouter';
 import { usePrayerTimes } from '@/hooks/use-api';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { ADHAN_RECITERS } from '@/lib/constants';
+import { motion, AnimatePresence } from 'framer-motion';
+
+function NotifPermDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" dir="rtl">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+      <motion.div
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="relative bg-card border border-border rounded-3xl p-6 w-full max-w-xs shadow-2xl text-center"
+      >
+        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <Bell className="w-7 h-7 text-primary" />
+        </div>
+        <h3 className="font-bold text-lg mb-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>السماح بالإشعارات</h3>
+        <p className="text-muted-foreground text-sm mb-5 leading-relaxed" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+          للحصول على تنبيهات الأذان في أوقات الصلاة، نحتاج إذنك بإرسال الإشعارات.
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3 rounded-2xl bg-secondary text-foreground font-bold text-sm hover:bg-secondary/80 transition-colors"
+            style={{ fontFamily: '"Tajawal", sans-serif' }}
+          >
+            لاحقاً
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3 rounded-2xl font-bold text-sm transition-colors"
+            style={{
+              background: 'linear-gradient(135deg, #C19A6B, #a07a4a)',
+              color: '#fff',
+              fontFamily: '"Tajawal", sans-serif',
+            }}
+          >
+            السماح
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 const PRAYERS = [
   { id: 'Fajr',    name: 'الفجر'  },
@@ -39,6 +83,8 @@ export function Home() {
   const [pref, setPref] = useLocalStorage<'off' | 'text' | 'adhan'>('notification_pref', 'adhan');
   const [reciterId, setReciterId] = useLocalStorage<string>('adhan_reciter', 'azan1');
   const [dateOffset, setDateOffset] = useState(0);
+  const [showNotifDialog, setShowNotifDialog] = useState(false);
+  const pendingPrefRef = useRef<'off' | 'text' | 'adhan' | null>(null);
 
   // Get coords from user profile
   const userProfile = (() => {
@@ -94,9 +140,27 @@ export function Home() {
     return () => clearInterval(id);
   }, [nextPrayer, dateOffset]);
 
-  const requestNotifPermission = async () => {
-    if ('Notification' in window && Notification.permission !== 'granted') {
-      await Notification.requestPermission();
+  const requestNotifPermission = () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      setShowNotifDialog(true);
+    }
+  };
+
+  const handleNotifConfirm = async () => {
+    setShowNotifDialog(false);
+    await Notification.requestPermission();
+    if (pendingPrefRef.current !== null) {
+      setPref(pendingPrefRef.current);
+      pendingPrefRef.current = null;
+    }
+  };
+
+  const handlePrefChange = (val: 'off' | 'text' | 'adhan') => {
+    if (val !== 'off' && 'Notification' in window && Notification.permission === 'default') {
+      pendingPrefRef.current = val;
+      setShowNotifDialog(true);
+    } else {
+      setPref(val);
     }
   };
 
@@ -115,6 +179,14 @@ export function Home() {
 
   return (
     <div className="pb-24 pt-6 px-4 max-w-lg mx-auto space-y-5" dir="rtl">
+      <AnimatePresence>
+        {showNotifDialog && (
+          <NotifPermDialog
+            onConfirm={handleNotifConfirm}
+            onCancel={() => { setShowNotifDialog(false); pendingPrefRef.current = null; }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Header Banner */}
       <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-5 text-primary-foreground shadow-lg shadow-primary/20 relative overflow-hidden">
@@ -244,7 +316,7 @@ export function Home() {
             </div>
             <select
               value={pref}
-              onChange={e => { setPref(e.target.value as any); requestNotifPermission(); }}
+              onChange={e => handlePrefChange(e.target.value as any)}
               className="bg-background border border-border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 ring-primary"
             >
               <option value="off">إيقاف</option>
