@@ -6,71 +6,152 @@ import { useEffect, useRef } from 'react';
 
 /* ── Realistic Kaaba SVG ────────────────────────────────────── */
 function KaabaIcon({ size = 56, glow = false }: { size?: number; glow?: boolean }) {
+  const w = size;
+  const h = Math.round(size * 1.25);
   return (
     <svg
-      width={size}
-      height={Math.round(size * 1.15)}
-      viewBox="0 0 56 64"
+      width={w}
+      height={h}
+      viewBox="0 0 80 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       style={{ display: 'block' }}
     >
-      {/* Roof gold trim */}
-      <rect x="1" y="1" width="54" height="6" rx="1.5" fill="#B8860B"/>
-      <rect x="1" y="1" width="54" height="2.5" rx="1" fill="#D4A017" opacity="0.9"/>
-      <rect x="1" y="5.5" width="54" height="1" fill="#8a6200" opacity="0.6"/>
+      <defs>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stopColor="#1c1c1c"/>
+          <stop offset="40%"  stopColor="#111"/>
+          <stop offset="100%" stopColor="#0a0a0a"/>
+        </linearGradient>
+        <linearGradient id="roofGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#E8C060"/>
+          <stop offset="50%"  stopColor="#B8860B"/>
+          <stop offset="100%" stopColor="#8a6200"/>
+        </linearGradient>
+        <linearGradient id="bandGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#C8991A"/>
+          <stop offset="30%"  stopColor="#8B6510"/>
+          <stop offset="100%" stopColor="#6a4e00"/>
+        </linearGradient>
+        <linearGradient id="doorGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#E8C060"/>
+          <stop offset="100%" stopColor="#A07820"/>
+        </linearGradient>
+        {glow && (
+          <filter id="glowFilter">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        )}
+      </defs>
 
-      {/* Main black body */}
-      <rect x="1" y="7" width="54" height="54" rx="1.5" fill="#111"/>
+      {/* === ROOF CROWN === */}
+      {/* Bottom shadow of roof */}
+      <rect x="2" y="10" width="76" height="2" fill="#5a3d00" opacity="0.5"/>
+      {/* Main roof */}
+      <rect x="2" y="2" width="76" height="10" rx="2" fill="url(#roofGrad)"/>
+      {/* Roof highlight */}
+      <rect x="2" y="2" width="76" height="3" rx="2" fill="#F0D070" opacity="0.6"/>
+      {/* Roof bottom edge */}
+      <rect x="2" y="10" width="76" height="1.5" fill="#6a4500"/>
 
-      {/* Kiswah gold band */}
-      <rect x="1" y="19" width="54" height="14" fill="#8B6914"/>
-      <rect x="1" y="19" width="54" height="2" fill="#D4A017" opacity="0.8"/>
-      <rect x="1" y="31" width="54" height="2" fill="#6a4e0a" opacity="0.7"/>
+      {/* === MAIN BLACK BODY === */}
+      <rect x="2" y="12" width="76" height="86" rx="1" fill="url(#bodyGrad)"/>
 
-      {/* Calligraphy lines on band */}
-      <rect x="5" y="22.5" width="46" height="1.2" rx="0.6" fill="#5a3d00" opacity="0.8"/>
-      <rect x="5" y="25.5" width="46" height="1.2" rx="0.6" fill="#5a3d00" opacity="0.8"/>
-      <rect x="5" y="28.5" width="46" height="1.2" rx="0.6" fill="#5a3d00" opacity="0.8"/>
+      {/* === LEFT CORNER EDGE HIGHLIGHT (subtle 3D) === */}
+      <rect x="2" y="12" width="5" height="86" fill="#C8991A" opacity="0.18"/>
+      {/* === RIGHT CORNER EDGE === */}
+      <rect x="73" y="12" width="5" height="86" fill="#000" opacity="0.35"/>
 
-      {/* Diamond ornaments */}
-      {[10, 20, 28, 36, 46].map(x => (
-        <polygon key={x}
-          points={`${x},22.5 ${x+3},25.5 ${x},28.5 ${x-3},25.5`}
-          fill="#D4A017" opacity="0.5"
-        />
+      {/* === KISWAH GOLD BAND (HIZAM) === */}
+      {/* Band shadow top */}
+      <rect x="2" y="27" width="76" height="1.5" fill="#000" opacity="0.4"/>
+      {/* Band body */}
+      <rect x="2" y="28" width="76" height="20" fill="url(#bandGrad)"/>
+      {/* Band top highlight border */}
+      <rect x="2" y="28" width="76" height="2.5" fill="#E8C060" opacity="0.85"/>
+      {/* Band bottom border */}
+      <rect x="2" y="46" width="76" height="2" fill="#E8C060" opacity="0.7"/>
+      {/* Band bottom shadow */}
+      <rect x="2" y="47.5" width="76" height="1" fill="#000" opacity="0.35"/>
+
+      {/* Calligraphy lines (Arabic script simulation) */}
+      <rect x="8"  y="32"  width="64" height="1.5" rx="0.75" fill="#4a3000" opacity="0.9"/>
+      <rect x="8"  y="35.5" width="64" height="1.5" rx="0.75" fill="#4a3000" opacity="0.9"/>
+      <rect x="8"  y="39"  width="64" height="1.5" rx="0.75" fill="#4a3000" opacity="0.9"/>
+      <rect x="8"  y="42.5" width="64" height="1.5" rx="0.75" fill="#4a3000" opacity="0.9"/>
+
+      {/* Script highlight on calligraphy lines */}
+      <rect x="8"  y="32"  width="64" height="0.6" rx="0.3" fill="#E8C060" opacity="0.3"/>
+      <rect x="8"  y="35.5" width="64" height="0.6" rx="0.3" fill="#E8C060" opacity="0.3"/>
+      <rect x="8"  y="39"  width="64" height="0.6" rx="0.3" fill="#E8C060" opacity="0.3"/>
+
+      {/* Diamond ornaments on band */}
+      {[15, 27, 40, 53, 65].map((x, i) => (
+        <g key={i}>
+          <polygon
+            points={`${x},33.5 ${x+4},37.5 ${x},41.5 ${x-4},37.5`}
+            fill="#E8C060" opacity="0.55"
+          />
+          <polygon
+            points={`${x},34.5 ${x+2.5},37.5 ${x},40.5 ${x-2.5},37.5`}
+            fill="#C8991A" opacity="0.5"
+          />
+        </g>
       ))}
 
-      {/* Vertical corner gold strips */}
-      <rect x="1"  y="7" width="4" height="54" fill="#B8860B" opacity="0.25"/>
-      <rect x="51" y="7" width="4" height="54" fill="#B8860B" opacity="0.25"/>
+      {/* === GOLDEN DOOR (BAB AL-KAABA) === */}
+      {/* Door outer frame */}
+      <rect x="22" y="52" width="36" height="46" rx="1.5" fill="url(#doorGrad)"/>
 
-      {/* Golden door frame */}
-      <rect x="16" y="36" width="24" height="25" rx="1" fill="#C19A6B"/>
-      {/* Door arch */}
-      <path d="M16 48 Q28 32 40 48" fill="#C19A6B"/>
-      {/* Door inner dark panel */}
-      <rect x="18.5" y="39" width="19" height="19" rx="0.8" fill="#6B4A10"/>
-      {/* Inner arch dark */}
-      <path d="M18.5 48 Q28 35.5 39.5 48" fill="#6B4A10"/>
-      {/* Door center divider */}
-      <line x1="28" y1="39" x2="28" y2="58" stroke="#C19A6B" strokeWidth="0.8" opacity="0.4"/>
-      {/* Door handle */}
-      <circle cx="28" cy="52" r="2.2" fill="#D4A017"/>
-      <circle cx="28" cy="52" r="2.2" stroke="#9a7000" strokeWidth="0.7" fill="none"/>
+      {/* Door arch (pointed) */}
+      <path d="M22 67 L40 48 L58 67" fill="url(#doorGrad)"/>
 
-      {/* Hajar al-Aswad (Black Stone) – bottom left corner */}
-      <rect x="1" y="57" width="7" height="4" rx="0.5" fill="#222"/>
-      <ellipse cx="4.5" cy="59" rx="2.5" ry="1.5" fill="#1a1a1a" stroke="#555" strokeWidth="0.5"/>
+      {/* Door frame inner shadow */}
+      <rect x="25" y="55" width="30" height="40" rx="1" fill="#5a3500"/>
+      <path d="M25 67 L40 51 L55 67" fill="#5a3500"/>
 
-      {/* Base corner stones */}
-      <rect x="1"  y="58" width="8" height="3" rx="0.5" fill="#2a2a2a"/>
-      <rect x="47" y="58" width="8" height="3" rx="0.5" fill="#2a2a2a"/>
+      {/* Door panels – left */}
+      <rect x="26" y="58" width="13" height="34" rx="0.5" fill="#4a2d00"/>
+      {/* Door panels – right */}
+      <rect x="41" y="58" width="13" height="34" rx="0.5" fill="#4a2d00"/>
 
-      {/* Subtle glow effect when aligned */}
+      {/* Inner arch decoration */}
+      <path d="M26 67 L40 53 L54 67" fill="none" stroke="#C8991A" strokeWidth="1" opacity="0.6"/>
+
+      {/* Door center vertical divider */}
+      <line x1="40" y1="58" x2="40" y2="92" stroke="#C8991A" strokeWidth="1.2" opacity="0.5"/>
+
+      {/* Door panel decorations */}
+      <rect x="27" y="61" width="11" height="14" rx="0.5" fill="none" stroke="#C8991A" strokeWidth="0.7" opacity="0.5"/>
+      <rect x="42" y="61" width="11" height="14" rx="0.5" fill="none" stroke="#C8991A" strokeWidth="0.7" opacity="0.5"/>
+      <rect x="27" y="77" width="11" height="12" rx="0.5" fill="none" stroke="#C8991A" strokeWidth="0.7" opacity="0.5"/>
+      <rect x="42" y="77" width="11" height="12" rx="0.5" fill="none" stroke="#C8991A" strokeWidth="0.7" opacity="0.5"/>
+
+      {/* Door handle – left */}
+      <circle cx="36" cy="82" r="2.5" fill="#E8C060"/>
+      <circle cx="36" cy="82" r="1.5" fill="#A07820"/>
+      {/* Door handle – right */}
+      <circle cx="44" cy="82" r="2.5" fill="#E8C060"/>
+      <circle cx="44" cy="82" r="1.5" fill="#A07820"/>
+
+      {/* Door top gold arch frame border */}
+      <path d="M22 67 L40 48 L58 67" fill="none" stroke="#E8C060" strokeWidth="1.5" opacity="0.7"/>
+
+      {/* === HAJAR AL-ASWAD CORNER (Bottom-left) === */}
+      <rect x="2" y="88" width="12" height="10" rx="0.5" fill="#1a1a1a"/>
+      <ellipse cx="8" cy="93" rx="4" ry="2.5" fill="#0d0d0d" stroke="#444" strokeWidth="0.6" opacity="0.8"/>
+      <ellipse cx="8" cy="93" rx="2" ry="1.2" fill="#222" stroke="#666" strokeWidth="0.4" opacity="0.6"/>
+
+      {/* === GLOW when aligned === */}
       {glow && (
-        <rect x="1" y="1" width="54" height="60" rx="1.5"
-          fill="none" stroke="#4ade80" strokeWidth="1.5" opacity="0.6"/>
+        <rect x="2" y="2" width="76" height="96" rx="2"
+          fill="none" stroke="#4ade80" strokeWidth="2" opacity="0.7"
+          filter="url(#glowFilter)"
+        />
       )}
     </svg>
   );
