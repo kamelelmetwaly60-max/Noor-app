@@ -11,11 +11,11 @@ import {
   MosqueIcon,
   QuranBookIcon,
   TasbihIcon,
-  BellIcon,
   MoonIcon,
   ScrollIcon,
   DuaHandsIcon,
-  MicIcon,
+  RadioIcon,
+  MosqueMapIcon,
 } from '@/components/NoorIcons';
 
 function IslamicPattern() {
@@ -125,6 +125,22 @@ export function MoreMenu() {
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
       desc: 'تدبر القرآن كلمةً بكلمة',
+    },
+    {
+      Icon: MosqueMapIcon,
+      label: 'المساجد القريبة',
+      path: '/mosques',
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+      desc: 'اكتشف المساجد حولك على الخريطة',
+    },
+    {
+      Icon: RadioIcon,
+      label: 'الإذاعات المصرية',
+      path: '/radio',
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+      desc: 'القرآن الكريم والبرنامج العام وأكثر',
     },
   ];
 
@@ -242,7 +258,8 @@ export function MoreMenu() {
               <FeatureChip Icon={DuaHandsIcon}     color="text-teal-500"      text="الأذكار والأدعية" />
               <FeatureChip Icon={ScrollIcon}       color="text-orange-500"    text="تفسير الجلالين" />
               <FeatureChip Icon={IslamicStarIcon}  color="text-emerald-500"   text="أسماء الله الحسنى" />
-              <FeatureChip Icon={BellIcon}         color="text-blue-500"      text="إشعارات الأذان" />
+              <FeatureChip Icon={MosqueMapIcon}    color="text-primary"       text="المساجد القريبة" />
+              <FeatureChip Icon={RadioIcon}        color="text-blue-500"      text="الإذاعات المصرية" />
               <FeatureChip Icon={MoonIcon}         color="text-slate-500"     text="الوضع الليلي" />
             </div>
           </div>
