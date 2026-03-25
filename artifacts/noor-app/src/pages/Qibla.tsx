@@ -5,7 +5,7 @@ import { Link } from 'wouter';
 
 export function Qibla() {
   const { heading, isSupported, requestPermission } = useCompass();
-  const { coords, error: geoError, isLoading: geoLoading, requestLocation } = useGeolocation(false);
+  const { coords, error: geoError, isLoading: geoLoading, requestLocation } = useGeolocation(true);
 
   const qiblaAngle     = coords ? calculateQibla(coords.lat, coords.lng) : 0;
   const compassRotation = heading !== null ? -heading : 0;
@@ -102,8 +102,12 @@ export function Qibla() {
       );
     }
 
-    // Need compass permission (iOS)
-    if (heading === null && coords) {
+    // iOS needs explicit compass permission tap
+    const needsIOSPermission =
+      heading === null &&
+      typeof (DeviceOrientationEvent as any).requestPermission === 'function';
+
+    if (needsIOSPermission) {
       return (
         <div className="flex flex-col items-center gap-4 w-full max-w-xs text-center">
           <div className="p-4 bg-amber-500/10 rounded-2xl">
