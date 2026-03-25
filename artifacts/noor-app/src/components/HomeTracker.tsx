@@ -12,13 +12,11 @@ type WardType = 'hizb' | 'juz';
 interface TrackerState {
   prayers: Record<PrayerKey, boolean>;
   quranWird: boolean;
-  wardType: WardType;
 }
 
 const DEFAULT_STATE: TrackerState = {
   prayers: { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false },
   quranWird: false,
-  wardType: 'hizb',
 };
 
 // ── Quran Juz / Hizb data ─────────────────────────────────────────────────────
