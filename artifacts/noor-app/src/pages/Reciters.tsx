@@ -305,7 +305,6 @@ export function Reciters() {
 
   const [search, setSearch] = useState('');
   const [phase, setPhase] = useState<Phase>('reciters');
-  const [downloading, setDownloading] = useState(false);
   const [selectedReciter, setSelectedReciter] = useState<{
     id: string; name: string; server: string; moshafName: string; country?: string;
   } | null>(null);
@@ -341,34 +340,12 @@ export function Reciters() {
     setPhase('player');
   };
 
-  const handleDownload = async () => {
-    if (!audio.serverUrl || !audio.surahNum) return;
-    const url = `${audio.serverUrl}${audio.surahNum.toString().padStart(3, '0')}.mp3`;
-    const filename = `${audio.surahName} - ${audio.reciterName}.mp3`;
-    setDownloading(true);
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } finally {
-      setDownloading(false);
-    }
-  };
+  const mp3Url = audio.serverUrl && audio.surahNum
+    ? `${audio.serverUrl}${audio.surahNum.toString().padStart(3, '0')}.mp3`
+    : null;
+  const mp3Filename = audio.surahName && audio.reciterName
+    ? `${audio.surahName} - ${audio.reciterName}.mp3`
+    : 'surah.mp3';
 
   // ── PHASE: Reciters ──────────────────────────────────────────────────────
   if (phase === 'reciters') {
@@ -503,18 +480,25 @@ export function Reciters() {
           <ArrowLeft className="w-5 h-5" style={{ color: '#C19A6B' }} />
         </button>
         <p className="text-sm font-bold" style={{ color: 'rgba(193,154,107,0.7)', fontFamily: '"Tajawal", sans-serif' }}>قيد التشغيل</p>
-        <button
-          onClick={handleDownload}
-          disabled={downloading}
-          className="p-2 rounded-full transition-all"
-          style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.25)' }}
-          title="تحميل السورة"
-        >
-          {downloading
-            ? <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(193,154,107,0.3)', borderTopColor: '#C19A6B' }} />
-            : <Download className="w-5 h-5" style={{ color: '#C19A6B' }} />
-          }
-        </button>
+        {mp3Url ? (
+          <a
+            href={mp3Url}
+            download={mp3Filename}
+            target="_self"
+            className="p-2 rounded-full transition-all flex items-center justify-center"
+            style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.25)' }}
+            title="تحميل السورة"
+          >
+            <Download className="w-5 h-5" style={{ color: '#C19A6B' }} />
+          </a>
+        ) : (
+          <div
+            className="p-2 rounded-full opacity-30"
+            style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.25)' }}
+          >
+            <Download className="w-5 h-5" style={{ color: '#C19A6B' }} />
+          </div>
+        )}
       </div>
 
       {/* Islamic Geometric Disc */}
