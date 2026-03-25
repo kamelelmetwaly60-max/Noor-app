@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useReciters } from '@/hooks/use-api';
-import { ArrowLeft, Search, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Search, ChevronRight, Download } from 'lucide-react';
 import { Link } from 'wouter';
 import { useAudio } from '@/contexts/AudioContext';
 import { SURAH_NAMES } from '@/lib/constants';
@@ -326,6 +326,7 @@ export function Reciters() {
 
   const [search, setSearch] = useState('');
   const [phase, setPhase] = useState<Phase>('reciters');
+  const [downloading, setDownloading] = useState(false);
   const [selectedReciter, setSelectedReciter] = useState<{
     id: string; name: string; server: string; moshafName: string; country?: string;
   } | null>(null);
@@ -359,6 +360,35 @@ export function Reciters() {
     const surahName = SURAH_NAMES[surahNum] ?? `سورة ${surahNum}`;
     audio.play({ reciterId: selectedReciter.id, reciterName: selectedReciter.name, serverUrl: selectedReciter.server, surahNum, surahName });
     setPhase('player');
+  };
+
+  const handleDownload = async () => {
+    if (!audio.serverUrl || !audio.surahNum) return;
+    const url = `${audio.serverUrl}${audio.surahNum.toString().padStart(3, '0')}.mp3`;
+    const filename = `${audio.surahName} - ${audio.reciterName}.mp3`;
+    setDownloading(true);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   // ── PHASE: Reciters ──────────────────────────────────────────────────────
@@ -401,7 +431,6 @@ export function Reciters() {
             <div className="space-y-2 pb-6">
               {filtered?.map((r: any) =>
                 (r.moshaf ?? []).filter((m: any) => !!m.server).map((moshaf: any, mi: number) => {
-                  const code = getCountryCode(r.country, r.name, r.id);
                   return (
                     <button
                       key={`${r.id}-${mi}`}
@@ -409,14 +438,6 @@ export function Reciters() {
                       className="w-full bg-card hover:bg-secondary/50 p-4 rounded-2xl border border-border shadow-sm flex items-center justify-between transition-colors"
                     >
                       <div className="flex items-center gap-3 text-right">
-                        {/* Real flag avatar — circular, clipped */}
-                        <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 border border-border bg-primary/10 flex items-center justify-center">
-                          <FlagImg
-                            code={code}
-                            className="w-full h-full"
-                            style={{ objectPosition: 'center' }}
-                          />
-                        </div>
                         <div>
                           <p className="font-bold" style={{ fontFamily: '"Tajawal", sans-serif' }}>{r.name}</p>
                           <p className="text-xs text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>
@@ -438,7 +459,6 @@ export function Reciters() {
 
   // ── PHASE: Surahs ────────────────────────────────────────────────────────
   if (phase === 'surahs') {
-    const code = getCountryCode(selectedReciter?.country, selectedReciter?.name, selectedReciter?.id);
     return (
       <div className="h-screen flex flex-col max-w-lg mx-auto bg-background" dir="rtl">
         <div className="px-4 py-4 flex items-center gap-4 bg-card shadow-sm border-b border-border flex-shrink-0">
@@ -446,10 +466,6 @@ export function Reciters() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-3 flex-1">
-            {/* Round flag */}
-            <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-border">
-              <FlagImg code={code} className="w-full h-full" style={{ objectPosition: 'center' }} />
-            </div>
             <div>
               <h1 className="font-bold text-lg leading-tight" style={{ fontFamily: '"Tajawal", sans-serif' }}>{selectedReciter?.name}</h1>
               <p className="text-xs text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>{selectedReciter?.moshafName}</p>
@@ -494,7 +510,6 @@ export function Reciters() {
 
   // ── PHASE: Full Player ────────────────────────────────────────────────────
   const progress = audio.duration ? audio.currentTime / audio.duration : 0;
-  const code = getCountryCode(selectedReciter?.country, selectedReciter?.name, selectedReciter?.id);
 
   return (
     <div className="h-screen flex flex-col max-w-lg mx-auto" dir="rtl"
@@ -509,7 +524,18 @@ export function Reciters() {
           <ArrowLeft className="w-5 h-5" style={{ color: '#C19A6B' }} />
         </button>
         <p className="text-sm font-bold" style={{ color: 'rgba(193,154,107,0.7)', fontFamily: '"Tajawal", sans-serif' }}>قيد التشغيل</p>
-        <div className="w-9" />
+        <button
+          onClick={handleDownload}
+          disabled={downloading}
+          className="p-2 rounded-full transition-all"
+          style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.25)' }}
+          title="تحميل السورة"
+        >
+          {downloading
+            ? <div className="w-5 h-5 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(193,154,107,0.3)', borderTopColor: '#C19A6B' }} />
+            : <Download className="w-5 h-5" style={{ color: '#C19A6B' }} />
+          }
+        </button>
       </div>
 
       {/* Islamic Geometric Disc */}
@@ -522,13 +548,10 @@ export function Reciters() {
           <div className="absolute inset-0 rounded-full pointer-events-none" style={{ background: 'radial-gradient(ellipse at 35% 25%, rgba(193,154,107,0.08) 0%, transparent 60%)' }} />
         </div>
 
-        {/* Reciter info with real flag */}
+        {/* Reciter info */}
         <div className="text-center w-full">
           <h2 className="text-2xl font-bold" style={{ fontFamily: '"Amiri", serif', color: '#e8d9b8' }}>سورة {audio.surahName}</h2>
           <div className="flex items-center justify-center gap-2 mt-2">
-            <div className="w-6 h-4 rounded overflow-hidden border border-white/10 flex-shrink-0">
-              <FlagImg code={code} className="w-full h-full" style={{ objectPosition: 'center' }} />
-            </div>
             <p style={{ fontFamily: '"Tajawal", sans-serif', color: 'rgba(193,154,107,0.7)' }}>{audio.reciterName}</p>
           </div>
         </div>
