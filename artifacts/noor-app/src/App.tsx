@@ -16,6 +16,7 @@ import { Quran } from "@/pages/Quran";
 import { Azkar } from "@/pages/Azkar";
 import { Tasbih } from "@/pages/Tasbih";
 import { MoreMenu } from "@/pages/MoreMenu";
+import { DailyTracker } from "@/pages/DailyTracker";
 import { Asma } from "@/pages/Asma";
 import { Reciters } from "@/pages/Reciters";
 import { SpeedReader } from "@/pages/SpeedReader";
@@ -60,6 +61,9 @@ function Router() {
       </Route>
       <Route path="/more">
         <AppShell><MoreMenu /></AppShell>
+      </Route>
+      <Route path="/tracker">
+        <AppShell><DailyTracker /></AppShell>
       </Route>
 
       <Route path="/asma">
