@@ -1,72 +1,75 @@
 import { useCompass } from '@/hooks/use-compass';
 import { useGeolocation, calculateQibla } from '@/hooks/use-geolocation';
-import { ArrowLeft, RotateCcw, MapPin } from 'lucide-react';
+import { ArrowLeft, MapPin, RotateCcw } from 'lucide-react';
 import { Link } from 'wouter';
 import { useEffect, useRef } from 'react';
 
-/* ── Kaaba SVG icon (small, for compass rim) ─────────────── */
-function KaabaSmall({ size = 32 }: { size?: number }) {
+/* ── Realistic Kaaba SVG (upright, not tilted) ──────────────── */
+function KaabaIcon({ size = 56 }: { size?: number }) {
+  const w = size;
+  const h = size * 1.1;
   return (
-    <svg width={size} height={size} viewBox="0 0 40 44" fill="none">
-      {/* Shadow */}
-      <ellipse cx="20" cy="43" rx="13" ry="2.5" fill="#00000055"/>
-      {/* Main body */}
-      <rect x="2" y="4" width="36" height="38" rx="2" fill="#111"/>
-      {/* Gold band */}
-      <rect x="2" y="12" width="36" height="10" fill="#B8860B"/>
-      <rect x="2" y="12" width="36" height="1.5" fill="#D4A017" opacity="0.8"/>
-      {/* Calligraphy lines */}
-      <rect x="5" y="14.5" width="30" height="1" rx="0.5" fill="#7A5800" opacity="0.8"/>
-      <rect x="5" y="17" width="30" height="1" rx="0.5" fill="#7A5800" opacity="0.8"/>
-      <rect x="5" y="19.5" width="30" height="1" rx="0.5" fill="#7A5800" opacity="0.8"/>
-      {/* Gold door frame */}
-      <rect x="13" y="26" width="14" height="16" rx="1" fill="#C19A6B"/>
-      <path d="M13 32 Q20 23 27 32" fill="#C19A6B"/>
-      <rect x="15" y="28" width="10" height="10" rx="0.8" fill="#8B6914"/>
-      <path d="M15 32 Q20 25 25 32" fill="#8B6914"/>
-      <circle cx="20" cy="35" r="1.2" fill="#D4A017"/>
-      {/* Roof trim */}
-      <rect x="1" y="2" width="38" height="3.5" rx="1" fill="#B8860B" opacity="0.9"/>
-      <rect x="1" y="2" width="38" height="1.2" rx="0.6" fill="#D4A017" opacity="0.8"/>
-    </svg>
-  );
-}
+    <svg width={w} height={h} viewBox="0 0 56 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Main black body */}
+      <rect x="3" y="6" width="50" height="52" rx="2" fill="#1a1a1a"/>
 
-/* ── Large Kaaba for empty state ─────────────────────────── */
-function KaabaLarge() {
-  return (
-    <svg width="80" height="92" viewBox="0 0 56 64" fill="none">
-      <ellipse cx="28" cy="63" rx="18" ry="3" fill="#00000033"/>
-      <rect x="4" y="8" width="48" height="52" rx="2" fill="#111111"/>
-      <rect x="4" y="19" width="48" height="13" fill="#B8860B"/>
-      <rect x="4" y="19" width="48" height="2" fill="#D4A017" opacity="0.8"/>
-      <rect x="7" y="22" width="42" height="1.2" rx="0.6" fill="#7A5800" opacity="0.7"/>
-      <rect x="7" y="25" width="42" height="1.2" rx="0.6" fill="#7A5800" opacity="0.7"/>
-      <rect x="7" y="28" width="42" height="1.2" rx="0.6" fill="#7A5800" opacity="0.7"/>
-      {[14, 22, 30, 38, 46].map(x => (
-        <polygon key={x} points={`${x},23 ${x+3},25.5 ${x},28 ${x-3},25.5`} fill="#D4A017" opacity="0.5"/>
+      {/* Gold Kiswah band (horizontal belt) */}
+      <rect x="3" y="18" width="50" height="12" fill="#B8860B"/>
+      {/* Kiswah highlight top */}
+      <rect x="3" y="18" width="50" height="1.8" fill="#D4A017" opacity="0.85"/>
+      {/* Kiswah highlight bottom */}
+      <rect x="3" y="28" width="50" height="1.2" fill="#8a6200" opacity="0.6"/>
+
+      {/* Calligraphy lines on band */}
+      <rect x="6"  y="21" width="44" height="1" rx="0.5" fill="#7A5800" opacity="0.75"/>
+      <rect x="6"  y="23.5" width="44" height="1" rx="0.5" fill="#7A5800" opacity="0.75"/>
+      <rect x="6"  y="26" width="44" height="1" rx="0.5" fill="#7A5800" opacity="0.75"/>
+
+      {/* Diamond ornaments on band */}
+      {[13, 21, 29, 37, 45].map(x => (
+        <polygon key={x}
+          points={`${x},21.5 ${x+3},24 ${x},26.5 ${x-3},24`}
+          fill="#D4A017" opacity="0.55"
+        />
       ))}
-      <rect x="4" y="8" width="3" height="52" fill="#B8860B" opacity="0.4"/>
-      <rect x="49" y="8" width="3" height="52" fill="#B8860B" opacity="0.4"/>
-      <rect x="18" y="35" width="20" height="25" rx="1.5" fill="#C19A6B"/>
-      <path d="M18 44 Q28 32 38 44" fill="#C19A6B"/>
-      <rect x="20.5" y="37" width="15" height="17" rx="1" fill="#8B6914"/>
-      <path d="M20.5 44 Q28 34.5 35.5 44" fill="#8B6914"/>
-      <circle cx="28" cy="48" r="1.5" fill="#D4A017"/>
-      <rect x="3" y="6" width="50" height="4" rx="1" fill="#B8860B" opacity="0.9"/>
-      <rect x="3" y="6" width="50" height="1.5" rx="0.8" fill="#D4A017" opacity="0.8"/>
+
+      {/* Corner vertical stripes */}
+      <rect x="3"  y="6" width="3.5" height="52" fill="#B8860B" opacity="0.35"/>
+      <rect x="49.5" y="6" width="3.5" height="52" fill="#B8860B" opacity="0.35"/>
+
+      {/* Golden door frame */}
+      <rect x="17" y="34" width="22" height="24" rx="1.5" fill="#C19A6B"/>
+      {/* Door arch */}
+      <path d="M17 44 Q28 30 39 44" fill="#C19A6B"/>
+      {/* Door inner panel */}
+      <rect x="19.5" y="37" width="17" height="17" rx="1" fill="#7A5200"/>
+      {/* Inner arch */}
+      <path d="M19.5 44 Q28 33 38.5 44" fill="#7A5200"/>
+      {/* Door handle */}
+      <circle cx="28" cy="49" r="1.8" fill="#D4A017"/>
+      {/* Handle ring */}
+      <circle cx="28" cy="49" r="1.8" stroke="#B8860B" strokeWidth="0.6" fill="none"/>
+
+      {/* Roof / top gold trim */}
+      <rect x="2" y="3" width="52" height="5" rx="1.2" fill="#B8860B" opacity="0.95"/>
+      <rect x="2" y="3" width="52" height="1.8" rx="0.9" fill="#D4A017" opacity="0.85"/>
+
+      {/* Corner stone base left */}
+      <rect x="3"  y="55" width="7" height="3" rx="0.5" fill="#333"/>
+      {/* Corner stone base right */}
+      <rect x="46" y="55" width="7" height="3" rx="0.5" fill="#333"/>
     </svg>
   );
 }
 
-/* ── Compass tick marks ───────────────────────────────────── */
-function CompassTicks() {
+/* ── Compass face (static background) ───────────────────────── */
+function CompassFace({ isAligned }: { isAligned: boolean }) {
   const ticks = Array.from({ length: 72 }, (_, i) => {
     const angle = i * 5;
     const isCardinal = angle % 90 === 0;
     const isMinor    = angle % 45 === 0;
     const outerR = 122;
-    const innerR = isCardinal ? 108 : isMinor ? 113 : 117;
+    const innerR = isCardinal ? 106 : isMinor ? 112 : 117;
     const rad    = (angle * Math.PI) / 180;
     return {
       x1: 130 + outerR * Math.sin(rad),
@@ -77,60 +80,71 @@ function CompassTicks() {
     };
   });
 
+  const ringColor = isAligned ? '#4ade80' : '#C19A6B';
+
   return (
     <svg viewBox="0 0 260 260" className="absolute inset-0 w-full h-full">
-      {/* Background */}
       <defs>
-        <radialGradient id="qBg" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#2a2a2a"/>
-          <stop offset="100%" stopColor="#0e0e0e"/>
+        <radialGradient id="compassBg2" cx="50%" cy="40%" r="65%">
+          <stop offset="0%" stopColor="var(--card)" stopOpacity="1"/>
+          <stop offset="100%" stopColor="var(--background)" stopOpacity="1"/>
         </radialGradient>
       </defs>
-      <circle cx="130" cy="130" r="126" fill="url(#qBg)"/>
+
+      {/* Background circle */}
+      <circle cx="130" cy="130" r="126" fill="url(#compassBg2)"/>
+
+      {/* Outer ring */}
+      <circle cx="130" cy="130" r="124" fill="none" stroke={ringColor} strokeWidth="2.5" opacity={isAligned ? 0.9 : 0.5}
+        style={{ transition: 'stroke 0.5s, opacity 0.5s' }}
+      />
+
+      {/* Inner decorative ring */}
+      <circle cx="130" cy="130" r="96" fill="none" stroke={ringColor} strokeWidth="0.6" opacity="0.2"/>
 
       {/* Tick marks */}
       {ticks.map((t, i) => (
         <line key={i}
           x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-          stroke={t.isCardinal || t.isMinor ? '#C19A6B' : '#555'}
+          stroke={t.isCardinal ? 'var(--primary)' : t.isMinor ? 'var(--primary)' : 'var(--border)'}
           strokeWidth={t.isCardinal ? 2.5 : t.isMinor ? 1.5 : 0.8}
-          opacity={t.isCardinal ? 1 : t.isMinor ? 0.7 : 0.5}
+          opacity={t.isCardinal ? 1 : t.isMinor ? 0.6 : 0.4}
         />
       ))}
 
-      {/* Cardinal labels */}
-      <text x="130" y="16" textAnchor="middle" fill="#ef4444" fontSize="16" fontWeight="bold" fontFamily="Tajawal,sans-serif">ش</text>
-      <text x="246" y="135" textAnchor="middle" fill="#C19A6B" fontSize="13" fontFamily="Tajawal,sans-serif">ق</text>
-      <text x="130" y="252" textAnchor="middle" fill="#C19A6B" fontSize="13" fontFamily="Tajawal,sans-serif">ج</text>
-      <text x="14" y="135" textAnchor="middle" fill="#C19A6B" fontSize="13" fontFamily="Tajawal,sans-serif">غ</text>
+      {/* Cardinal labels – FIXED (background doesn't rotate) */}
+      <text x="130" y="14" textAnchor="middle" fill="#ef4444" fontSize="14" fontWeight="bold" fontFamily="Tajawal,sans-serif">ش</text>
+      <text x="248" y="135" textAnchor="middle" fill="var(--primary)" fontSize="12" fontFamily="Tajawal,sans-serif">ق</text>
+      <text x="130" y="250" textAnchor="middle" fill="var(--primary)" fontSize="12" fontFamily="Tajawal,sans-serif">ج</text>
+      <text x="12"  y="135" textAnchor="middle" fill="var(--primary)" fontSize="12" fontFamily="Tajawal,sans-serif">غ</text>
     </svg>
   );
 }
 
-/* ── Main Qibla component ─────────────────────────────────── */
+/* ── Main Qibla component ─────────────────────────────────────── */
 export function Qibla() {
   const { heading, isSupported, requestPermission } = useCompass();
   const { coords, error: geoError, isLoading: geoLoading, requestLocation } = useGeolocation(true);
 
   const qiblaAngle = coords ? calculateQibla(coords.lat, coords.lng) : 0;
 
-  // The compass ring rotates so N stays at top → rotate by -heading
-  const compassRotation = heading !== null ? -heading : 0;
+  // Arrow on screen points toward Qibla:
+  // When device heading = qiblaAngle → arrow should point UP (0°)
+  const arrowAngle = ((qiblaAngle - (heading ?? 0)) % 360 + 360) % 360;
+  const isAligned  = heading !== null && coords !== null && (arrowAngle < 8 || arrowAngle > 352);
 
-  // Kaaba on screen = (qiblaAngle - heading); 0° means top = aligned
-  const kaabaOnScreen = ((qiblaAngle - (heading ?? 0)) % 360 + 360) % 360;
-  const isAligned = heading !== null && coords !== null && (kaabaOnScreen < 8 || kaabaOnScreen > 352);
-
-  // Vibrate when aligned
+  // Haptic feedback when aligned
   const wasAligned = useRef(false);
   useEffect(() => {
     if (isAligned && !wasAligned.current && navigator.vibrate) {
-      navigator.vibrate([80, 40, 80]);
+      navigator.vibrate([100, 50, 100]);
     }
     wasAligned.current = isAligned;
   }, [isAligned]);
 
-  const renderCompass = () => {
+  const SIZE = 290;
+
+  const renderContent = () => {
     if (geoLoading) {
       return (
         <div className="flex flex-col items-center gap-5">
@@ -145,20 +159,20 @@ export function Qibla() {
     if (geoError || !coords) {
       return (
         <div className="flex flex-col items-center gap-6 text-center max-w-xs w-full">
-          <div className="opacity-70"><KaabaLarge /></div>
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 w-full">
+          <div className="opacity-70"><KaabaIcon size={72}/></div>
+          <div className="bg-card border border-border rounded-3xl p-5 w-full shadow-sm">
             <p className="font-bold text-base mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>
               تحديد اتجاه القبلة
             </p>
             {geoError && (
-              <p className="text-sm text-red-400 mb-3" style={{ fontFamily: '"Tajawal", sans-serif' }}>{geoError}</p>
+              <p className="text-sm text-destructive mb-3" style={{ fontFamily: '"Tajawal", sans-serif' }}>{geoError}</p>
             )}
-            <p className="text-sm text-white/50 mb-4" style={{ fontFamily: '"Tajawal", sans-serif' }}>
-              يحتاج التطبيق إلى موقعك لحساب اتجاه القبلة بدقة
+            <p className="text-sm text-muted-foreground mb-4" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+              يحتاج التطبيق إلى موقعك لحساب اتجاه القبلة
             </p>
             <button onClick={requestLocation}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-black"
-              style={{ background: 'linear-gradient(135deg,#C19A6B,#a07a4a)', fontFamily: '"Tajawal", sans-serif' }}>
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm"
+              style={{ background: 'linear-gradient(135deg,#C19A6B,#a07a4a)', color: '#fff', fontFamily: '"Tajawal", sans-serif' }}>
               <MapPin className="w-4 h-4"/>
               تحديد موقعي
             </button>
@@ -170,12 +184,12 @@ export function Qibla() {
     if (!isSupported) {
       return (
         <div className="flex flex-col items-center gap-5 text-center max-w-xs">
-          <KaabaLarge />
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 w-full">
+          <KaabaIcon size={72}/>
+          <div className="bg-card border border-border rounded-3xl p-5 w-full shadow-sm">
             <p className="font-bold text-base mb-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>البوصلة غير مدعومة</p>
-            <p className="text-sm text-white/50 mb-3" style={{ fontFamily: '"Tajawal", sans-serif' }}>اتجاه القبلة من موقعك</p>
+            <p className="text-sm text-muted-foreground mb-3" style={{ fontFamily: '"Tajawal", sans-serif' }}>اتجاه القبلة من موقعك</p>
             <p className="text-5xl font-black text-primary">{Math.round(qiblaAngle)}°</p>
-            <p className="text-sm text-white/40 mt-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>شمالاً</p>
+            <p className="text-sm text-muted-foreground mt-1" style={{ fontFamily: '"Tajawal", sans-serif' }}>شمالاً</p>
           </div>
         </div>
       );
@@ -187,108 +201,95 @@ export function Qibla() {
     if (needsIOSPermission) {
       return (
         <div className="flex flex-col items-center gap-5 w-full max-w-xs text-center">
-          <KaabaLarge />
+          <KaabaIcon size={72}/>
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-5 w-full">
-            <p className="font-bold text-amber-400 mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>تفعيل البوصلة</p>
-            <p className="text-sm text-white/50" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+            <p className="font-bold text-amber-600 mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>تفعيل البوصلة</p>
+            <p className="text-sm text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>
               اضغط للسماح بالوصول لحساس الاتجاه
             </p>
           </div>
           <button onClick={requestPermission}
-            className="w-full py-3.5 rounded-2xl font-bold text-sm text-black"
-            style={{ background: 'linear-gradient(135deg,#C19A6B,#a07a4a)', fontFamily: '"Tajawal", sans-serif' }}>
+            className="w-full py-3.5 rounded-2xl font-bold text-sm"
+            style={{ background: 'linear-gradient(135deg,#C19A6B,#a07a4a)', color: '#fff', fontFamily: '"Tajawal", sans-serif' }}>
             تفعيل البوصلة
           </button>
         </div>
       );
     }
 
-    /* Full compass */
-    const SIZE = 290;
-    const CENTER = SIZE / 2;
-    const KAABA_R = 94; // radius where Kaaba sits on the rotating ring
-
-    // Kaaba position on the rotating compass rose (at qiblaAngle from North)
-    const kaabaRad = (qiblaAngle * Math.PI) / 180;
-    const kaabaX = CENTER + KAABA_R * Math.sin(kaabaRad);
-    const kaabaY = CENTER - KAABA_R * Math.cos(kaabaRad);
-
+    /* ── Full compass with fixed background and rotating arrow ── */
     return (
       <div className="flex flex-col items-center gap-6 w-full">
 
         {/* Status badge */}
         <div className={`px-6 py-3 rounded-2xl text-center transition-all duration-500 ${
           isAligned
-            ? 'bg-green-500/20 border border-green-500/50'
-            : 'bg-white/5 border border-white/10'
+            ? 'bg-green-500/15 border border-green-500/40'
+            : 'bg-card border border-border'
         }`}>
           {isAligned ? (
-            <p className="font-bold text-base text-green-400" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+            <p className="font-bold text-base text-green-600 dark:text-green-400" style={{ fontFamily: '"Tajawal", sans-serif' }}>
               أنت في اتجاه القبلة ✓
             </p>
           ) : (
             <div>
-              <p className="font-bold text-sm text-white" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+              <p className="font-bold text-sm text-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>
                 وجّه هاتفك نحو الكعبة المشرفة
               </p>
-              <p className="text-xs text-white/40 mt-0.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+              <p className="text-xs text-muted-foreground mt-0.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>
                 القبلة على بُعد {Math.round(qiblaAngle)}° من الشمال
               </p>
             </div>
           )}
         </div>
 
-        {/* Compass */}
+        {/* Compass container */}
         <div className="relative" style={{ width: SIZE, height: SIZE }}>
 
-          {/* Outer glow ring */}
-          <div
-            className="absolute inset-0 rounded-full transition-all duration-700"
+          {/* Outer glow */}
+          <div className="absolute inset-0 rounded-full transition-all duration-700"
             style={{
               boxShadow: isAligned
-                ? '0 0 0 3px rgba(74,222,128,0.7), 0 0 50px rgba(74,222,128,0.35)'
-                : '0 0 0 2px rgba(193,154,107,0.4), 0 0 30px rgba(193,154,107,0.1)',
+                ? '0 0 0 3px rgba(74,222,128,0.7), 0 0 50px rgba(74,222,128,0.25)'
+                : '0 0 0 2px rgba(193,154,107,0.35), 0 0 30px rgba(193,154,107,0.08)',
             }}
           />
 
-          {/* Rotating compass ring */}
-          <div
-            className="absolute inset-0 rounded-full overflow-hidden"
+          {/* Static compass face (does NOT rotate) */}
+          <CompassFace isAligned={isAligned} />
+
+          {/* Kaaba icon – fixed at top center (12 o'clock) */}
+          <div className="absolute pointer-events-none"
             style={{
-              transform: `rotate(${compassRotation}deg)`,
-              transition: heading !== null ? 'transform 0.08s ease-out' : 'none',
+              top: 6,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              filter: isAligned ? 'drop-shadow(0 0 10px rgba(74,222,128,0.9))' : 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))',
+              transition: 'filter 0.5s',
             }}
           >
-            {/* Tick marks and compass face */}
-            <CompassTicks />
-
-            {/* Kaaba at qibla direction on the rotating ring */}
-            <div
-              className="absolute"
-              style={{
-                left: `${(kaabaX / SIZE) * 100}%`,
-                top: `${(kaabaY / SIZE) * 100}%`,
-                transform: 'translate(-50%, -50%)',
-                filter: isAligned ? 'drop-shadow(0 0 10px rgba(74,222,128,0.8))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.6))',
-              }}
-            >
-              <KaabaSmall size={34} />
-            </div>
+            <KaabaIcon size={36} />
           </div>
 
-          {/* Fixed bidirectional arrow (does NOT rotate) */}
-          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-            <svg width="60" height="180" viewBox="0 0 60 180">
-              {/* Arrow pointing UP */}
+          {/* Rotating ARROW – points toward Qibla direction */}
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+            style={{
+              transform: `rotate(${arrowAngle}deg)`,
+              transition: heading !== null ? 'transform 0.1s ease-out' : 'none',
+            }}
+          >
+            <svg width="56" height="200" viewBox="0 0 56 200">
+              {/* Arrow up (main – pointing toward Qibla) */}
               <polygon
-                points="30,4 18,32 24,28 24,90 36,90 36,28 42,32"
+                points="28,2 15,38 22,32 22,100 34,100 34,32 41,38"
                 fill={isAligned ? '#4ade80' : '#C19A6B'}
-                style={{ transition: 'fill 0.5s' }}
+                style={{ transition: 'fill 0.5s', filter: isAligned ? 'drop-shadow(0 0 6px rgba(74,222,128,0.8))' : 'none' }}
               />
-              {/* Arrow pointing DOWN (dimmed) */}
+              {/* Arrow down (opposite – dimmed) */}
               <polygon
-                points="30,176 18,148 24,152 24,90 36,90 36,152 42,148"
-                fill={isAligned ? 'rgba(74,222,128,0.35)' : 'rgba(193,154,107,0.3)'}
+                points="28,198 15,162 22,168 22,100 34,100 34,168 41,162"
+                fill={isAligned ? 'rgba(74,222,128,0.3)' : 'rgba(193,154,107,0.3)'}
                 style={{ transition: 'fill 0.5s' }}
               />
             </svg>
@@ -297,10 +298,10 @@ export function Qibla() {
           {/* Center dot */}
           <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
             <div
-              className="w-4 h-4 rounded-full transition-colors duration-500"
+              className="w-4 h-4 rounded-full transition-all duration-500"
               style={{
                 background: isAligned ? '#4ade80' : '#C19A6B',
-                border: '3px solid #0e0e0e',
+                border: '3px solid var(--background)',
                 boxShadow: isAligned ? '0 0 12px rgba(74,222,128,0.8)' : '0 0 8px rgba(193,154,107,0.5)',
               }}
             />
@@ -309,8 +310,8 @@ export function Qibla() {
 
         {/* Coordinates */}
         {coords && (
-          <p className="text-xs text-white/30" style={{ fontFamily: '"Tajawal", sans-serif' }}>
-            موقعك: {coords.lat.toFixed(4)}، {coords.lng.toFixed(4)}
+          <p className="text-xs text-muted-foreground/50" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+            موقعك: {coords.lat.toFixed(4)}°، {coords.lng.toFixed(4)}°
           </p>
         )}
       </div>
@@ -318,28 +319,28 @@ export function Qibla() {
   };
 
   return (
-    <div className="h-screen flex flex-col max-w-lg mx-auto" style={{ background: '#0e0e0e' }} dir="rtl">
+    <div className="h-screen flex flex-col max-w-lg mx-auto bg-background" dir="rtl">
       {/* Header */}
-      <div className="px-4 py-4 flex items-center gap-4 flex-shrink-0"
-        style={{ borderBottom: '1px solid rgba(193,154,107,0.15)' }}>
+      <div className="px-4 py-4 flex items-center gap-4 bg-card shadow-sm border-b border-border flex-shrink-0">
         <Link href="/more">
-          <button className="p-2 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-            <ArrowLeft className="w-5 h-5 text-white"/>
+          <button className="p-2 bg-secondary rounded-full">
+            <ArrowLeft className="w-5 h-5" />
           </button>
         </Link>
-        <h1 className="font-bold text-xl text-white" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+        <h1 className="font-bold text-xl" style={{ fontFamily: '"Tajawal", sans-serif' }}>
           تحديد القبلة
         </h1>
-        {geoError && (
-          <button onClick={requestLocation} className="mr-auto p-2 rounded-full"
-            style={{ background: 'rgba(193,154,107,0.15)' }}>
+        {(geoError || (!geoLoading && !coords)) && (
+          <button onClick={requestLocation}
+            className="mr-auto p-2 rounded-full bg-secondary"
+            title="إعادة المحاولة">
             <RotateCcw className="w-4 h-4 text-primary"/>
           </button>
         )}
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6">
-        {renderCompass()}
+        {renderContent()}
       </div>
     </div>
   );

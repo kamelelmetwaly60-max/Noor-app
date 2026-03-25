@@ -128,14 +128,6 @@ export function MoreMenu() {
       desc: 'بوصلة ذكية لاتجاه الكعبة المشرفة',
     },
     {
-      Icon: MosqueMapIcon,
-      label: 'المساجد القريبة',
-      path: '/mosques',
-      color: 'text-teal-500',
-      bg: 'bg-teal-500/10',
-      desc: 'اكتشف المساجد حولك مع التنقل',
-    },
-    {
       Icon: RadioIcon,
       label: 'الإذاعات الإسلامية المصرية',
       path: '/radio',
