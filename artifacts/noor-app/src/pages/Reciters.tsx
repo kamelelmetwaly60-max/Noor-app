@@ -340,12 +340,15 @@ export function Reciters() {
     setPhase('player');
   };
 
-  const mp3Url = audio.serverUrl && audio.surahNum
+  const directMp3 = audio.serverUrl && audio.surahNum
     ? `${audio.serverUrl}${audio.surahNum.toString().padStart(3, '0')}.mp3`
     : null;
   const mp3Filename = audio.surahName && audio.reciterName
     ? `${audio.surahName} - ${audio.reciterName}.mp3`
     : 'surah.mp3';
+  const mp3Url = directMp3
+    ? `/api/download?url=${encodeURIComponent(directMp3)}&filename=${encodeURIComponent(mp3Filename)}`
+    : null;
 
   // ── PHASE: Reciters ──────────────────────────────────────────────────────
   if (phase === 'reciters') {
@@ -483,7 +486,7 @@ export function Reciters() {
         {mp3Url ? (
           <a
             href={mp3Url}
-            download={mp3Filename}
+            download
             target="_self"
             className="p-2 rounded-full transition-all flex items-center justify-center"
             style={{ background: 'rgba(193,154,107,0.15)', border: '1px solid rgba(193,154,107,0.25)' }}
