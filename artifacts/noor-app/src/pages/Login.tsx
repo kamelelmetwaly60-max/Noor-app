@@ -31,14 +31,15 @@ export function Login({ onComplete }: LoginProps) {
       <div className="relative z-10 w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="relative mx-auto mb-4 w-28 h-28 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full" style={{ border: '1px solid rgba(193,154,107,0.3)', boxShadow: '0 0 30px rgba(193,154,107,0.15)' }} />
-            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-[#C19A6B] to-[#a07a4a] flex items-center justify-center shadow-2xl">
-              <span className="text-white text-4xl" style={{ fontFamily: '"Amiri", serif' }}>ن</span>
-            </div>
+          <div className="relative mx-auto mb-2 w-36 h-36 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-3xl" style={{ boxShadow: '0 0 40px rgba(193,154,107,0.2)' }} />
+            <img
+              src="/logo.png"
+              alt="شعار نور"
+              className="w-full h-full object-contain rounded-3xl"
+            />
           </div>
-          <h1 className="text-5xl text-[#C19A6B] mb-1" style={{ fontFamily: '"Amiri", serif', textShadow: '0 0 20px rgba(193,154,107,0.3)' }}>نُـور</h1>
-          <p className="text-white/40 text-xs tracking-widest">تطبيق إسلامي شامل</p>
+          <p className="text-white/40 text-xs tracking-widest mt-1">تطبيق إسلامي شامل</p>
         </div>
 
         {/* Card */}

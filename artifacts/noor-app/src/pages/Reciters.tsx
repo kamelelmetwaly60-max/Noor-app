@@ -248,19 +248,6 @@ function IslamicDisc({ isPlaying, surahName }: { isPlaying?: boolean; surahName?
       <rect x="37" y="37" width="126" height="126" transform="rotate(45,100,100)"
         fill="none" stroke="#C19A6B" strokeWidth="0.7" opacity="0.18" />
 
-      {/* 8-pointed star fill */}
-      <polygon points={star8} fill="rgba(193,154,107,0.12)" stroke="#C19A6B" strokeWidth="1.5" opacity="0.8" />
-
-      {/* Dots at 8 star outer points */}
-      {Array.from({ length: 8 }, (_, i) => {
-        const angle = (i * 45 - 90) * Math.PI / 180;
-        return (
-          <circle key={i}
-            cx={100 + 62 * Math.cos(angle)} cy={100 + 62 * Math.sin(angle)}
-            r="3.5" fill="#C19A6B" opacity="0.7"
-          />
-        );
-      })}
 
       {/* 4 lines crossing (Islamic cross pattern) */}
       {[0, 45, 90, 135].map(deg => {
@@ -292,25 +279,17 @@ function IslamicDisc({ isPlaying, surahName }: { isPlaying?: boolean; surahName?
       })}
 
       {/* Surah name in center */}
-      {surahName ? (
+      {surahName && (
         <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
           style={{
             fontFamily: '"Amiri Quran", "Amiri", serif',
-            fontSize: surahName.length <= 3 ? '16px' : surahName.length <= 5 ? '13px' : '11px',
+            fontSize: surahName.length <= 3 ? '24px' : surahName.length <= 5 ? '20px' : '16px',
             fill: '#d4b483',
             fontWeight: 'bold',
           }}>
           {surahName}
         </text>
-      ) : (
-        <text x="100" y="107" textAnchor="middle" dominantBaseline="middle"
-          style={{ fontFamily: '"Amiri Quran", "Amiri", serif', fontSize: '24px', fill: '#d4b483', fontWeight: 'bold' }}>
-          ق
-        </text>
       )}
-
-      {/* Center dot */}
-      <circle cx="100" cy="100" r="5" fill="#C19A6B" opacity="0.9" />
     </svg>
   );
 }
