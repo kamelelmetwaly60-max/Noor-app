@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Link } from 'wouter';
-import { ChevronLeft, Sun, Moon, LogOut, LayoutGrid } from 'lucide-react';
+import { ChevronLeft, Sun, Moon, LogOut } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { firebaseSignOut } from '@/lib/firebase';
-import { MORNING_AZKAR, EVENING_AZKAR } from '@/lib/constants';
 import {
   IslamicStarIcon,
   HeadphonesIcon,
@@ -48,198 +47,6 @@ function QiblaCompassIcon({ className = '', size = 24 }: { className?: string; s
       {/* Center */}
       <circle cx="12" cy="12" r="1.2" fill="currentColor"/>
     </svg>
-  );
-}
-
-function getDayScore(dateKey: string): number {
-  let score = 0;
-  try {
-    const raw = localStorage.getItem(`daily_tracker_${dateKey}`);
-    if (raw) {
-      const t = JSON.parse(raw);
-      score += Object.values(t.prayers || {}).filter(Boolean).length;
-      if (t.quranWird) score += 1;
-    }
-  } catch {}
-  try {
-    const raw = localStorage.getItem(`azkar_${dateKey}`);
-    if (raw) {
-      const p = JSON.parse(raw);
-      const m = MORNING_AZKAR.every((z) => (p[z.id] ?? 0) >= z.count);
-      const e = EVENING_AZKAR.every((z) => (p[z.id] ?? 0) >= z.count);
-      if (m && e) score += 1;
-    }
-  } catch {}
-  return score;
-}
-
-function cellColor(score: number, isToday: boolean): string {
-  if (isToday && score === 0) return 'rgba(197,160,89,0.12)';
-  if (score === 0) return 'rgba(197,160,89,0.05)';
-  if (score <= 2) return 'rgba(197,160,89,0.25)';
-  if (score <= 4) return 'rgba(197,160,89,0.5)';
-  if (score <= 6) return 'rgba(197,160,89,0.75)';
-  return '#c5a059';
-}
-
-function TrackingHeatmap() {
-  const ARABIC_DAYS = ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
-
-  const { weeks, monthLabels } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const dayOfWeek = today.getDay();
-    const totalCells = 91;
-    const startOffset = totalCells - 1 + (6 - dayOfWeek);
-    const gridStart = new Date(today);
-    gridStart.setDate(gridStart.getDate() - startOffset);
-
-    const cells: { dateKey: string; score: number; isToday: boolean; date: Date }[] = [];
-    for (let i = 0; i <= startOffset; i++) {
-      const d = new Date(gridStart);
-      d.setDate(d.getDate() + i);
-      const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      const isFuture = d > today;
-      cells.push({
-        dateKey,
-        score: isFuture ? -1 : getDayScore(dateKey),
-        isToday: d.getTime() === today.getTime(),
-        date: d,
-      });
-    }
-
-    const numWeeks = Math.ceil(cells.length / 7);
-    const weeksArr: typeof cells[] = [];
-    for (let w = 0; w < numWeeks; w++) {
-      weeksArr.push(cells.slice(w * 7, w * 7 + 7));
-    }
-
-    const months: { label: string; col: number }[] = [];
-    weeksArr.forEach((week, col) => {
-      const firstDay = week[0];
-      if (firstDay && (col === 0 || firstDay.date.getDate() <= 7)) {
-        const m = new Intl.DateTimeFormat('ar-EG', { month: 'short' }).format(firstDay.date);
-        if (!months.length || months[months.length - 1].label !== m) {
-          months.push({ label: m, col });
-        }
-      }
-    });
-
-    return { weeks: weeksArr, monthLabels: months };
-  }, []);
-
-  return (
-    <div className="mt-8 bg-card border border-primary/15 rounded-3xl overflow-hidden shadow-sm">
-      <div className="px-5 pt-5 pb-2">
-        <div className="flex items-center justify-between mb-1">
-          <h2
-            className="font-bold text-base"
-            style={{ fontFamily: '"Tajawal", sans-serif', color: '#c5a059' }}
-          >
-            سجل التتبع اليومي
-          </h2>
-          <svg width="18" height="18" viewBox="0 0 40 40" fill="#c5a059" opacity={0.6}>
-            <polygon points="20,2 24,14 37,14 27,22 31,35 20,27 9,35 13,22 3,14 16,14" />
-          </svg>
-        </div>
-        <p
-          className="text-xs text-muted-foreground mb-4"
-          style={{ fontFamily: '"Tajawal", sans-serif' }}
-        >
-          الأيام الذهبية = التزام كامل • الأيام الباهتة = التزام جزئي
-        </p>
-
-        <div className="overflow-x-auto" style={{ direction: 'ltr' }}>
-          <div style={{ display: 'inline-block', paddingBottom: 4 }}>
-            {/* Month labels */}
-            <div style={{ display: 'flex', marginBottom: 4, paddingRight: 24 }}>
-              {weeks.map((_, col) => {
-                const ml = monthLabels.find((m) => m.col === col);
-                return (
-                  <div
-                    key={col}
-                    style={{ width: 14, marginLeft: 2, flexShrink: 0 }}
-                    className="text-[8px] text-muted-foreground"
-                  >
-                    {ml ? ml.label : ''}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Grid */}
-            <div style={{ display: 'flex', gap: 2 }}>
-              {weeks.map((week, col) => (
-                <div key={col} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {week.map((cell, row) => (
-                    <div
-                      key={row}
-                      title={cell.score >= 0 ? `${cell.dateKey}: ${cell.score}/7` : ''}
-                      style={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: 3,
-                        background: cell.score < 0 ? 'transparent' : cellColor(cell.score, cell.isToday),
-                        border: cell.isToday ? '1.5px solid rgba(197,160,89,0.8)' : 'none',
-                        boxShadow:
-                          cell.score === 7
-                            ? '0 0 4px rgba(197,160,89,0.6)'
-                            : 'none',
-                      }}
-                    />
-                  ))}
-                </div>
-              ))}
-
-              {/* Day labels */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
-                {ARABIC_DAYS.map((d) => (
-                  <div
-                    key={d}
-                    style={{ height: 12, lineHeight: '12px' }}
-                    className="text-[8px] text-muted-foreground pr-1"
-                  >
-                    {d}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div
-          className="flex items-center gap-3 mt-4 pt-3 border-t border-border/30"
-          style={{ direction: 'rtl' }}
-        >
-          <span
-            className="text-xs text-muted-foreground"
-            style={{ fontFamily: '"Tajawal", sans-serif' }}
-          >
-            أقل
-          </span>
-          {[0, 2, 4, 6, 7].map((s) => (
-            <div
-              key={s}
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 3,
-                background: cellColor(s, false),
-                border: '1px solid rgba(197,160,89,0.2)',
-              }}
-            />
-          ))}
-          <span
-            className="text-xs text-muted-foreground"
-            style={{ fontFamily: '"Tajawal", sans-serif' }}
-          >
-            أكثر
-          </span>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -311,14 +118,6 @@ export function MoreMenu() {
   const userProfile = userProfileRaw ? JSON.parse(userProfileRaw) : null;
 
   const MENU_ITEMS = [
-    {
-      Icon: LayoutGrid,
-      label: 'المتتبع اليومي',
-      path: '/tracker',
-      color: 'text-primary',
-      bg: 'bg-primary/10',
-      desc: 'تتبع صلواتك وأذكارك ووردك اليومي',
-    },
     {
       Icon: QiblaCompassIcon,
       label: 'تحديد القبلة',
@@ -444,9 +243,6 @@ export function MoreMenu() {
           </div>
         </button>
       </div>
-
-      {/* Tracking Heatmap */}
-      <TrackingHeatmap />
 
       {/* About App Section */}
       <div className="mt-6 bg-card border border-primary/15 rounded-3xl overflow-hidden shadow-sm">

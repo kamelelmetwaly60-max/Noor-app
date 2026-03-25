@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePrayerTimes } from '@/hooks/use-api';
+import { HomeTracker } from '@/components/HomeTracker';
 
 const PRAYERS = [
   { id: 'Fajr',    name: 'الفجر'  },
@@ -197,6 +198,9 @@ export function Home() {
           </div>
         )}
       </div>
+
+      {/* Daily Tracker */}
+      <HomeTracker />
     </div>
   );
 }
