@@ -33,6 +33,24 @@ function IslamicPattern() {
   );
 }
 
+function QiblaCompassIcon({ className = '', size = 24 }: { className?: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
+      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
+      {/* Needle up (gold) */}
+      <polygon points="12,4 10.5,10 12,9 13.5,10" fill="currentColor" opacity="0.9"/>
+      {/* Needle down */}
+      <polygon points="12,20 10.5,14 12,15 13.5,14" fill="currentColor" opacity="0.4"/>
+      {/* Kaaba small */}
+      <rect x="10.5" y="2.5" width="3" height="3.5" rx="0.3" fill="currentColor" opacity="0.8"/>
+      <line x1="10.5" y1="3.8" x2="13.5" y2="3.8" stroke="currentColor" strokeWidth="0.6" opacity="0.6"/>
+      {/* Center */}
+      <circle cx="12" cy="12" r="1.2" fill="currentColor"/>
+    </svg>
+  );
+}
+
 function LogoutConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" dir="rtl">
@@ -72,7 +90,6 @@ function LogoutConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; o
   );
 }
 
-/* ── Feature chip icon ──────────────────────────────────── */
 function FeatureChip({ Icon, text, color }: { Icon: React.ComponentType<{ className?: string; size?: number }>; text: string; color: string }) {
   return (
     <div className="flex items-center gap-2 bg-secondary/40 rounded-xl px-3 py-2.5">
@@ -103,6 +120,30 @@ export function MoreMenu() {
 
   const MENU_ITEMS = [
     {
+      Icon: QiblaCompassIcon,
+      label: 'تحديد القبلة',
+      path: '/qibla',
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+      desc: 'بوصلة ذكية لاتجاه الكعبة المشرفة',
+    },
+    {
+      Icon: MosqueMapIcon,
+      label: 'المساجد القريبة',
+      path: '/mosques',
+      color: 'text-teal-500',
+      bg: 'bg-teal-500/10',
+      desc: 'اكتشف المساجد حولك مع التنقل',
+    },
+    {
+      Icon: RadioIcon,
+      label: 'الإذاعات الإسلامية المصرية',
+      path: '/radio',
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+      desc: 'إذاعة القرآن الكريم والحياة الإسلامية',
+    },
+    {
       Icon: IslamicStarIcon,
       label: 'أسماء الله الحسنى',
       path: '/asma',
@@ -125,22 +166,6 @@ export function MoreMenu() {
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
       desc: 'تدبر القرآن كلمةً بكلمة',
-    },
-    {
-      Icon: MosqueMapIcon,
-      label: 'المساجد القريبة',
-      path: '/mosques',
-      color: 'text-primary',
-      bg: 'bg-primary/10',
-      desc: 'اكتشف المساجد حولك على الخريطة',
-    },
-    {
-      Icon: RadioIcon,
-      label: 'الإذاعات المصرية',
-      path: '/radio',
-      color: 'text-blue-500',
-      bg: 'bg-blue-500/10',
-      desc: 'القرآن الكريم والبرنامج العام وأكثر',
     },
   ];
 
@@ -250,17 +275,18 @@ export function MoreMenu() {
           <div>
             <h3 className="font-bold text-sm text-primary mb-3" style={{ fontFamily: '"Tajawal", sans-serif' }}>مميزات التطبيق</h3>
             <div className="grid grid-cols-2 gap-2">
-              <FeatureChip Icon={MosqueIcon}       color="text-primary"       text="مواقيت الصلاة" />
-              <FeatureChip Icon={QuranBookIcon}    color="text-emerald-600"   text="القرآن الكريم كاملاً" />
-              <FeatureChip Icon={HeadphonesIcon}   color="text-purple-500"    text="أكثر من 50 قارئاً" />
-              <FeatureChip Icon={TasbihIcon}       color="text-amber-600"     text="السبحة الإلكترونية" />
-              <FeatureChip Icon={SmartReaderIcon}  color="text-amber-500"     text="قارئ التدبر الذكي" />
-              <FeatureChip Icon={DuaHandsIcon}     color="text-teal-500"      text="الأذكار والأدعية" />
-              <FeatureChip Icon={ScrollIcon}       color="text-orange-500"    text="تفسير الجلالين" />
-              <FeatureChip Icon={IslamicStarIcon}  color="text-emerald-500"   text="أسماء الله الحسنى" />
-              <FeatureChip Icon={MosqueMapIcon}    color="text-primary"       text="المساجد القريبة" />
-              <FeatureChip Icon={RadioIcon}        color="text-blue-500"      text="الإذاعات المصرية" />
-              <FeatureChip Icon={MoonIcon}         color="text-slate-500"     text="الوضع الليلي" />
+              <FeatureChip Icon={MosqueIcon}          color="text-primary"       text="مواقيت الصلاة" />
+              <FeatureChip Icon={QuranBookIcon}        color="text-emerald-600"   text="القرآن الكريم كاملاً" />
+              <FeatureChip Icon={HeadphonesIcon}       color="text-purple-500"    text="أكثر من 50 قارئاً" />
+              <FeatureChip Icon={TasbihIcon}           color="text-amber-600"     text="السبحة الإلكترونية" />
+              <FeatureChip Icon={SmartReaderIcon}      color="text-amber-500"     text="قارئ التدبر الذكي" />
+              <FeatureChip Icon={DuaHandsIcon}         color="text-teal-500"      text="الأذكار والأدعية" />
+              <FeatureChip Icon={ScrollIcon}           color="text-orange-500"    text="تفسير الجلالين" />
+              <FeatureChip Icon={IslamicStarIcon}      color="text-emerald-500"   text="أسماء الله الحسنى" />
+              <FeatureChip Icon={MosqueMapIcon}        color="text-teal-500"      text="المساجد القريبة" />
+              <FeatureChip Icon={RadioIcon}            color="text-blue-500"      text="الإذاعات الإسلامية" />
+              <FeatureChip Icon={QiblaCompassIcon}     color="text-primary"       text="تحديد القبلة" />
+              <FeatureChip Icon={MoonIcon}             color="text-slate-500"     text="الوضع الليلي" />
             </div>
           </div>
 
@@ -268,10 +294,6 @@ export function MoreMenu() {
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>مصادر البيانات</span>
               <span className="text-foreground/70 text-left text-[11px]" style={{ fontFamily: '"Tajawal", sans-serif' }}>aladhan.com • alquran.cloud</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>الأذان</span>
-              <span className="text-foreground/70" style={{ fontFamily: '"Tajawal", sans-serif' }}>islamicfinder.org</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>القراء</span>

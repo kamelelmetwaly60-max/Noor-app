@@ -276,10 +276,20 @@ export function MosquesFinder() {
                 </div>
               </div>
               {isActive && (
-                <div className="flex items-center gap-1 text-xs font-bold flex-shrink-0" style={{ color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(
+                      `https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=walking`,
+                      '_blank'
+                    );
+                  }}
+                  className="flex items-center gap-1 text-xs font-bold flex-shrink-0 px-3 py-2 rounded-xl active:scale-95 transition-transform"
+                  style={{ background: 'rgba(193,154,107,0.15)', color: '#C19A6B', fontFamily: '"Tajawal", sans-serif' }}
+                >
                   <Navigation className="w-4 h-4" />
-                  <span>على الخريطة</span>
-                </div>
+                  <span>تنقّل</span>
+                </button>
               )}
             </div>
           );

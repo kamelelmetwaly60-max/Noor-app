@@ -2,107 +2,140 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { ArrowLeft, Volume2, WifiOff, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'wouter';
 
-/* ─── Islamic Radio Stations Data ──────────────────────────── */
+/* ─── Egyptian Islamic Radio Stations ─────────────────────── */
 const STATIONS = [
   {
     id: 1,
     name: 'إذاعة القرآن الكريم',
     subtitle: 'الإذاعة المصرية · 98.2 FM',
     url: 'https://n14d.radiojar.com/mnvqp44w3p8uv',
-    logo: 'https://www.google.com/s2/favicons?domain=radioegypt.eu&sz=128',
+    fallbackUrls: [
+      'https://radioegypt.radioca.st/quran',
+      'https://stream.radiojar.com/mnvqp44w3p8uv',
+    ],
     color: '#10B981',
     glow: 'rgba(16,185,129,0.4)',
     bg: 'rgba(16,185,129,0.1)',
     border: 'rgba(16,185,129,0.3)',
-    svgFallback: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8">
-        <rect width="48" height="48" rx="12" fill="#10B981" opacity="0.2"/>
-        <path d="M12 36V18c0-1 .7-2 1.7-2.3l16-5c1.5-.5 3.3.6 3.3 2.3v4" stroke="#10B981" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="18" cy="36" r="4" stroke="#10B981" strokeWidth="2"/>
-        <circle cx="34" cy="30" r="4" stroke="#10B981" strokeWidth="2"/>
-        <line x1="22" y1="36" x2="30" y2="30" stroke="#10B981" strokeWidth="2"/>
-        <line x1="22" y1="20" x2="33" y2="16" stroke="#10B981" strokeWidth="1.5" opacity="0.5"/>
+    svgLogo: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-9 h-9">
+        <rect width="48" height="48" rx="12" fill="#10B981" opacity="0.15"/>
+        {/* Open Quran */}
+        <path d="M24 10 C20 10 10 12 9 16 L9 38 C10 35 20 33 24 33" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M24 10 C28 10 38 12 39 16 L39 38 C38 35 28 33 24 33" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <line x1="24" y1="10" x2="24" y2="33" stroke="#10B981" strokeWidth="1.5"/>
+        {/* Radio waves */}
+        <path d="M4 28 Q4 20 8 16" stroke="#10B981" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.6"/>
+        <path d="M2 32 Q2 18 8 12" stroke="#10B981" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.4"/>
+        <path d="M44 28 Q44 20 40 16" stroke="#10B981" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.6"/>
+        <path d="M46 32 Q46 18 40 12" stroke="#10B981" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.4"/>
       </svg>
     ),
   },
   {
     id: 2,
     name: 'إذاعة الحياة الإسلامية',
-    subtitle: 'الإذاعة المصرية · إسلامية',
+    subtitle: 'الإذاعة المصرية · 95.2 FM',
     url: 'https://n14d.radiojar.com/m2ytrjfp98zuv',
-    logo: 'https://www.google.com/s2/favicons?domain=ertu.org&sz=128',
+    fallbackUrls: [
+      'https://radioegypt.radioca.st/islamic',
+      'https://stream.radiojar.com/m2ytrjfp98zuv',
+    ],
     color: '#C19A6B',
     glow: 'rgba(193,154,107,0.4)',
     bg: 'rgba(193,154,107,0.1)',
     border: 'rgba(193,154,107,0.3)',
-    svgFallback: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8">
-        <rect width="48" height="48" rx="12" fill="#C19A6B" opacity="0.2"/>
-        <path d="M24 6C14.1 6 6 14.1 6 24s8.1 18 18 18 18-8.1 18-18S33.9 6 24 6z" stroke="#C19A6B" strokeWidth="2"/>
-        <path d="M24 6c-4 6-4 30 0 36M24 6c4 6 4 30 0 36" stroke="#C19A6B" strokeWidth="1.5" opacity="0.6"/>
-        <line x1="6" y1="20" x2="42" y2="20" stroke="#C19A6B" strokeWidth="1.5" opacity="0.6"/>
-        <line x1="6" y1="28" x2="42" y2="28" stroke="#C19A6B" strokeWidth="1.5" opacity="0.6"/>
+    svgLogo: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-9 h-9">
+        <rect width="48" height="48" rx="12" fill="#C19A6B" opacity="0.15"/>
+        {/* Mosque dome */}
+        <path d="M14 28 Q14 18 24 16 Q34 18 34 28" stroke="#C19A6B" strokeWidth="2" strokeLinecap="round"/>
+        <rect x="12" y="28" width="24" height="12" rx="1" stroke="#C19A6B" strokeWidth="1.8"/>
+        {/* Minaret left */}
+        <rect x="8" y="22" width="4" height="18" rx="0.8" stroke="#C19A6B" strokeWidth="1.5"/>
+        <path d="M8 22 Q10 18 12 22" stroke="#C19A6B" strokeWidth="1.2" fill="none"/>
+        {/* Minaret right */}
+        <rect x="36" y="22" width="4" height="18" rx="0.8" stroke="#C19A6B" strokeWidth="1.5"/>
+        <path d="M36 22 Q38 18 40 22" stroke="#C19A6B" strokeWidth="1.2" fill="none"/>
+        {/* Crescent on top */}
+        <path d="M22 13 Q24 9 27 13" stroke="#C19A6B" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
       </svg>
     ),
   },
   {
     id: 3,
     name: 'إذاعة القرآن الكريم',
-    subtitle: 'هيئة الإذاعة السعودية · بث مباشر',
-    url: 'https://Liveaudio.saudiradio.net/SaudiQuran',
-    logo: 'https://www.google.com/s2/favicons?domain=saudiradio.net&sz=128',
-    color: '#F59E0B',
-    glow: 'rgba(245,158,11,0.4)',
-    bg: 'rgba(245,158,11,0.1)',
-    border: 'rgba(245,158,11,0.3)',
-    svgFallback: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8">
-        <rect width="48" height="48" rx="12" fill="#F59E0B" opacity="0.2"/>
-        <path d="M24 10c-7.7 0-14 6.3-14 14s6.3 14 14 14 14-6.3 14-14S31.7 10 24 10z" stroke="#F59E0B" strokeWidth="2"/>
-        <path d="M20 19l8 5-8 5V19z" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1.5" strokeLinejoin="round"/>
+    subtitle: 'راديو مصر الديني · بث مباشر',
+    url: 'https://radioegypt.radioca.st/quran2',
+    fallbackUrls: [
+      'https://n14d.radiojar.com/cfuouuun7yzuv',
+      'https://stream.radiojar.com/cfuouuun7yzuv',
+    ],
+    color: '#3B82F6',
+    glow: 'rgba(59,130,246,0.4)',
+    bg: 'rgba(59,130,246,0.1)',
+    border: 'rgba(59,130,246,0.3)',
+    svgLogo: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-9 h-9">
+        <rect width="48" height="48" rx="12" fill="#3B82F6" opacity="0.15"/>
+        {/* Star & Crescent */}
+        <path d="M24 10 C15 10 9 17 9 24 C9 31 15 38 24 38 C31 38 37 33 38 26 C35 29 30 30 26 28 C20 25 18 18 22 13 C22.5 12 23 11 24 10Z" stroke="#3B82F6" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+        <polygon points="32,14 33.5,18.5 38,18.5 34.5,21.5 36,26 32,23 28,26 29.5,21.5 26,18.5 30.5,18.5" stroke="#3B82F6" strokeWidth="1.2" fill="none"/>
       </svg>
     ),
   },
   {
     id: 4,
-    name: 'راديو الإسلام',
-    subtitle: 'إذاعة إسلامية عربية · بث مباشر',
-    url: 'https://stream.radiojar.com/0t240xbtftzuv',
-    logo: 'https://www.google.com/s2/favicons?domain=islamway.net&sz=128',
+    name: 'نور القرآن الكريم',
+    subtitle: 'إذاعة إسلامية مصرية · تلاوات خاشعة',
+    url: 'https://n14d.radiojar.com/0t240xbtftzuv',
+    fallbackUrls: [
+      'https://stream.radiojar.com/0t240xbtftzuv',
+    ],
     color: '#8B5CF6',
     glow: 'rgba(139,92,246,0.4)',
     bg: 'rgba(139,92,246,0.1)',
     border: 'rgba(139,92,246,0.3)',
-    svgFallback: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8">
-        <rect width="48" height="48" rx="12" fill="#8B5CF6" opacity="0.2"/>
-        <path d="M24 8l3 9h9l-7 5 3 9-8-6-8 6 3-9-7-5h9z" stroke="#8B5CF6" strokeWidth="2" strokeLinejoin="round"/>
+    svgLogo: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-9 h-9">
+        <rect width="48" height="48" rx="12" fill="#8B5CF6" opacity="0.15"/>
+        {/* Light rays / nour */}
+        <circle cx="24" cy="24" r="8" stroke="#8B5CF6" strokeWidth="1.8"/>
+        <line x1="24" y1="8" x2="24" y2="12" stroke="#8B5CF6" strokeWidth="1.8" strokeLinecap="round"/>
+        <line x1="24" y1="36" x2="24" y2="40" stroke="#8B5CF6" strokeWidth="1.8" strokeLinecap="round"/>
+        <line x1="8" y1="24" x2="12" y2="24" stroke="#8B5CF6" strokeWidth="1.8" strokeLinecap="round"/>
+        <line x1="36" y1="24" x2="40" y2="24" stroke="#8B5CF6" strokeWidth="1.8" strokeLinecap="round"/>
+        <line x1="13.4" y1="13.4" x2="16.2" y2="16.2" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+        <line x1="31.8" y1="31.8" x2="34.6" y2="34.6" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+        <line x1="34.6" y1="13.4" x2="31.8" y2="16.2" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+        <line x1="16.2" y1="31.8" x2="13.4" y2="34.6" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+        <circle cx="24" cy="24" r="3" fill="#8B5CF6"/>
       </svg>
     ),
   },
   {
     id: 5,
-    name: 'إذاعة نور القرآن',
-    subtitle: 'قرآن كريم · تلاوات خاشعة',
-    url: 'https://stream.radiojar.com/cfuouuun7yzuv',
-    logo: 'https://www.google.com/s2/favicons?domain=mp3quran.net&sz=128',
-    color: '#3B82F6',
-    glow: 'rgba(59,130,246,0.4)',
-    bg: 'rgba(59,130,246,0.1)',
-    border: 'rgba(59,130,246,0.3)',
-    svgFallback: (
-      <svg viewBox="0 0 48 48" fill="none" className="w-8 h-8">
-        <rect width="48" height="48" rx="12" fill="#3B82F6" opacity="0.2"/>
-        <rect x="10" y="12" width="28" height="24" rx="3" stroke="#3B82F6" strokeWidth="2"/>
-        <line x1="18" y1="12" x2="18" y2="36" stroke="#3B82F6" strokeWidth="1.5"/>
-        <line x1="13" y1="19" x2="16" y2="19" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round"/>
-        <line x1="13" y1="22" x2="16" y2="22" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round"/>
-        <line x1="13" y1="25" x2="16" y2="25" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round"/>
-        <line x1="13" y1="28" x2="16" y2="28" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round"/>
-        <line x1="21" y1="19" x2="35" y2="19" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
-        <line x1="21" y1="22" x2="35" y2="22" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
-        <line x1="21" y1="25" x2="35" y2="25" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
-        <line x1="21" y1="28" x2="35" y2="28" stroke="#3B82F6" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+    name: 'أصوات القرآن الكريم',
+    subtitle: 'تلاوات مصرية · بث متواصل',
+    url: 'https://n14d.radiojar.com/cfuouuun7yzuv',
+    fallbackUrls: [
+      'https://stream.radiojar.com/mnvqp44w3p8uv',
+    ],
+    color: '#F59E0B',
+    glow: 'rgba(245,158,11,0.4)',
+    bg: 'rgba(245,158,11,0.1)',
+    border: 'rgba(245,158,11,0.3)',
+    svgLogo: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-9 h-9">
+        <rect width="48" height="48" rx="12" fill="#F59E0B" opacity="0.15"/>
+        {/* Microphone */}
+        <rect x="18" y="8" width="12" height="18" rx="6" stroke="#F59E0B" strokeWidth="2"/>
+        <path d="M12 26 Q12 38 24 38 Q36 38 36 26" stroke="#F59E0B" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        <line x1="24" y1="38" x2="24" y2="42" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="18" y1="42" x2="30" y2="42" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"/>
+        {/* Sound waves inside mic */}
+        <line x1="20" y1="18" x2="28" y2="18" stroke="#F59E0B" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
+        <line x1="20" y1="21" x2="28" y2="21" stroke="#F59E0B" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
       </svg>
     ),
   },
@@ -125,33 +158,54 @@ function Bars({ color, playing }: { color: string; playing: boolean }) {
   );
 }
 
-function StationLogo({ logo, fallback, color }: { logo: string; fallback: React.ReactNode; color: string }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <>{fallback}</>;
-  return (
-    <img
-      src={logo}
-      alt=""
-      className="w-8 h-8 rounded-lg object-contain"
-      style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.2))' }}
-      onError={() => setFailed(true)}
-    />
-  );
-}
-
 export function EgyptianRadio() {
-  const [activeId, setActiveId] = useState<number | null>(null);
-  const [status, setStatus]     = useState<Status>('idle');
+  const [activeId, setActiveId]         = useState<number | null>(null);
+  const [status, setStatus]             = useState<Status>('idle');
+  const [fallbackIdx, setFallbackIdx]   = useState<Record<number, number>>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const a = new Audio();
+    a.crossOrigin = 'anonymous';
     audioRef.current = a;
-    a.addEventListener('waiting',  () => setStatus(s => s !== 'error' ? 'loading' : s));
-    a.addEventListener('playing',  () => setStatus('playing'));
-    a.addEventListener('error',    () => setStatus('error'));
-    a.addEventListener('stalled',  () => setStatus(s => s !== 'error' ? 'loading' : s));
-    return () => { a.pause(); a.src = ''; };
+
+    const onWaiting  = () => setStatus(s => s !== 'error' ? 'loading' : s);
+    const onPlaying  = () => setStatus('playing');
+    const onError    = () => setStatus('error');
+    const onStalled  = () => setStatus(s => s !== 'error' ? 'loading' : s);
+
+    a.addEventListener('waiting',  onWaiting);
+    a.addEventListener('playing',  onPlaying);
+    a.addEventListener('error',    onError);
+    a.addEventListener('stalled',  onStalled);
+    return () => {
+      a.pause(); a.src = '';
+      a.removeEventListener('waiting',  onWaiting);
+      a.removeEventListener('playing',  onPlaying);
+      a.removeEventListener('error',    onError);
+      a.removeEventListener('stalled',  onStalled);
+    };
+  }, []);
+
+  const tryPlay = useCallback((station: typeof STATIONS[0], url: string) => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.pause();
+    a.src = url;
+    setStatus('loading');
+    a.load();
+    a.play().catch(() => {
+      // Try fallback
+      setFallbackIdx(prev => {
+        const idx = (prev[station.id] ?? -1) + 1;
+        if (idx < station.fallbackUrls.length) {
+          setTimeout(() => tryPlay(station, station.fallbackUrls[idx]), 500);
+          return { ...prev, [station.id]: idx };
+        }
+        setStatus('error');
+        return prev;
+      });
+    });
   }, []);
 
   const toggle = useCallback((station: typeof STATIONS[0]) => {
@@ -163,20 +217,17 @@ export function EgyptianRadio() {
         a.pause(); a.src = '';
         setStatus('idle'); setActiveId(null);
       } else {
-        // retry
-        a.src = station.url;
-        setStatus('loading');
-        a.play().catch(() => setStatus('error'));
+        // retry from primary
+        setFallbackIdx(prev => ({ ...prev, [station.id]: -1 }));
+        tryPlay(station, station.url);
       }
       return;
     }
 
-    a.pause();
-    a.src = station.url;
     setActiveId(station.id);
-    setStatus('loading');
-    a.play().catch(() => setStatus('error'));
-  }, [activeId, status]);
+    setFallbackIdx(prev => ({ ...prev, [station.id]: -1 }));
+    tryPlay(station, station.url);
+  }, [activeId, status, tryPlay]);
 
   const activeStation = STATIONS.find(s => s.id === activeId);
 
@@ -195,7 +246,7 @@ export function EgyptianRadio() {
           <button className="p-2 bg-secondary rounded-full"><ArrowLeft className="w-5 h-5" /></button>
         </Link>
         <div className="flex-1">
-          <h1 className="font-bold text-xl" style={{ fontFamily: '"Tajawal", sans-serif' }}>الإذاعات الإسلامية</h1>
+          <h1 className="font-bold text-xl" style={{ fontFamily: '"Tajawal", sans-serif' }}>الإذاعات الإسلامية المصرية</h1>
           <p className="text-xs text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>
             {activeStation ? activeStation.name : 'اختر إذاعة للاستماع'}
           </p>
@@ -208,14 +259,21 @@ export function EgyptianRadio() {
       {/* Now Playing Bar */}
       {activeStation && (
         <div className="mx-4 mt-4 p-4 rounded-2xl flex items-center gap-4 flex-shrink-0"
-          style={{ background: activeStation.bg, border: `1px solid ${activeStation.border}`, boxShadow: status === 'playing' ? `0 0 28px ${activeStation.glow}` : undefined }}>
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-background/50">
-            <StationLogo logo={activeStation.logo} fallback={activeStation.svgFallback} color={activeStation.color} />
+          style={{
+            background: activeStation.bg,
+            border: `1px solid ${activeStation.border}`,
+            boxShadow: status === 'playing' ? `0 0 28px ${activeStation.glow}` : undefined,
+          }}>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-background/50"
+            style={{ border: `1.5px solid ${activeStation.border}` }}>
+            {activeStation.svgLogo}
           </div>
           <div className="flex-1">
             <p className="font-bold text-sm" style={{ fontFamily: '"Tajawal", sans-serif', color: activeStation.color }}>{activeStation.name}</p>
             <p className="text-xs text-muted-foreground mt-0.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>
-              {status === 'loading' ? 'جاري الاتصال...' : status === 'error' ? '⚠️ تعذّر الاتصال - اضغط للمحاولة مرة أخرى' : `${activeStation.subtitle} • يبث الآن`}
+              {status === 'loading' ? 'جاري الاتصال بالخادم...'
+              : status === 'error' ? '⚠️ تعذّر الاتصال — اضغط للمحاولة مجدداً'
+              : `${activeStation.subtitle} • يبث الآن`}
             </p>
           </div>
           <div className="flex-shrink-0">
@@ -240,14 +298,14 @@ export function EgyptianRadio() {
               className="w-full p-4 rounded-2xl border text-right transition-all duration-300 active:scale-[0.98]"
               style={{
                 background: isActive ? s.bg : undefined,
-                borderColor: isActive ? s.border : undefined,
+                borderColor: isActive ? s.border : 'var(--border)',
                 boxShadow: isPlaying ? `0 0 20px ${s.glow}, 0 2px 12px rgba(0,0,0,0.06)` : undefined,
               }}>
               <div className="flex items-center gap-4">
                 {/* Logo */}
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all"
-                  style={{ background: isActive ? s.color + '20' : 'var(--secondary)', border: isActive ? `2px solid ${s.border}` : '2px solid transparent' }}>
-                  <StationLogo logo={s.logo} fallback={s.svgFallback} color={s.color} />
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all bg-card"
+                  style={{ border: isActive ? `2px solid ${s.border}` : '2px solid transparent' }}>
+                  {s.svgLogo}
                 </div>
 
                 {/* Info */}
@@ -258,7 +316,7 @@ export function EgyptianRadio() {
                   <p className="text-xs text-muted-foreground mt-0.5" style={{ fontFamily: '"Tajawal", sans-serif' }}>{s.subtitle}</p>
                 </div>
 
-                {/* Play/Pause/Error button */}
+                {/* Play/Pause button */}
                 <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
                   style={{ background: isActive ? s.color : `${s.color}18` }}>
                   {isLoading ? (
@@ -277,7 +335,7 @@ export function EgyptianRadio() {
                 </div>
               </div>
 
-              {/* Equalizer bar at bottom when playing */}
+              {/* Equalizer when playing */}
               {isPlaying && (
                 <div className="flex gap-1 items-end mt-3 px-1" style={{ height: 16 }}>
                   {Array.from({ length: 20 }, (_, i) => (
@@ -294,6 +352,13 @@ export function EgyptianRadio() {
             </button>
           );
         })}
+
+        {/* Info */}
+        <div className="text-center pt-2 pb-4">
+          <p className="text-xs text-muted-foreground/60" style={{ fontFamily: '"Tajawal", sans-serif' }}>
+            جميع الإذاعات إسلامية مصرية متخصصة
+          </p>
+        </div>
       </div>
     </div>
   );
