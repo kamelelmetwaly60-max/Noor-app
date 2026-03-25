@@ -1,9 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { Compass, Book, Mic, Moon, Sun, ChevronLeft, Zap, LogOut } from 'lucide-react';
+import { ChevronLeft, Sun, Moon, LogOut } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { firebaseSignOut } from '@/lib/firebase';
+import {
+  IslamicStarIcon,
+  HeadphonesIcon,
+  SmartReaderIcon,
+  MosqueIcon,
+  QuranBookIcon,
+  TasbihIcon,
+  BellIcon,
+  MoonIcon,
+  ScrollIcon,
+  DuaHandsIcon,
+  MicIcon,
+} from '@/components/NoorIcons';
 
 function IslamicPattern() {
   return (
@@ -59,6 +72,16 @@ function LogoutConfirmDialog({ onConfirm, onCancel }: { onConfirm: () => void; o
   );
 }
 
+/* ── Feature chip icon ──────────────────────────────────── */
+function FeatureChip({ Icon, text, color }: { Icon: React.ComponentType<{ className?: string; size?: number }>; text: string; color: string }) {
+  return (
+    <div className="flex items-center gap-2 bg-secondary/40 rounded-xl px-3 py-2.5">
+      <Icon className={`w-4 h-4 flex-shrink-0 ${color}`} size={16} />
+      <span className="text-xs text-foreground/80 leading-tight" style={{ fontFamily: '"Tajawal", sans-serif' }}>{text}</span>
+    </div>
+  );
+}
+
 export function MoreMenu() {
   const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('theme', 'light');
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -79,10 +102,30 @@ export function MoreMenu() {
   const userProfile = userProfileRaw ? JSON.parse(userProfileRaw) : null;
 
   const MENU_ITEMS = [
-    { icon: Compass, label: "تحديد القبلة",       path: "/qibla",       color: "text-blue-500",    bg: "bg-blue-500/10",    desc: "اتجاه الكعبة المشرفة" },
-    { icon: Book,    label: "أسماء الله الحسنى",  path: "/asma",        color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "99 اسماً مع معانيها" },
-    { icon: Mic,     label: "القراء والاستماع",    path: "/reciters",    color: "text-purple-500",  bg: "bg-purple-500/10",  desc: "50+ قارئ للقرآن" },
-    { icon: Zap,     label: "قارئ التدبر الذكي",  path: "/speed-reader",color: "text-amber-500",   bg: "bg-amber-500/10",   desc: "Word-by-Word Speed Reader" },
+    {
+      Icon: IslamicStarIcon,
+      label: 'أسماء الله الحسنى',
+      path: '/asma',
+      color: 'text-emerald-500',
+      bg: 'bg-emerald-500/10',
+      desc: '99 اسماً مع معانيها',
+    },
+    {
+      Icon: HeadphonesIcon,
+      label: 'القراء والاستماع',
+      path: '/reciters',
+      color: 'text-purple-500',
+      bg: 'bg-purple-500/10',
+      desc: '50+ قارئ للقرآن الكريم',
+    },
+    {
+      Icon: SmartReaderIcon,
+      label: 'قارئ التدبر الذكي',
+      path: '/speed-reader',
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
+      desc: 'تدبر القرآن كلمةً بكلمة',
+    },
   ];
 
   return (
@@ -128,7 +171,7 @@ export function MoreMenu() {
 
       <div className="space-y-3">
         {MENU_ITEMS.map((item, idx) => {
-          const Icon = item.icon;
+          const Icon = item.Icon;
           return (
             <Link
               key={idx}
@@ -137,7 +180,7 @@ export function MoreMenu() {
             >
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.bg} ${item.color}`}>
-                  <Icon className="w-6 h-6" />
+                  <Icon size={24} />
                 </div>
                 <div>
                   <span className="font-bold text-base block" style={{ fontFamily: '"Tajawal", sans-serif' }}>{item.label}</span>
@@ -189,32 +232,25 @@ export function MoreMenu() {
           </div>
 
           <div>
-            <h3 className="font-bold text-sm text-primary mb-2" style={{ fontFamily: '"Tajawal", sans-serif' }}>مميزات التطبيق</h3>
+            <h3 className="font-bold text-sm text-primary mb-3" style={{ fontFamily: '"Tajawal", sans-serif' }}>مميزات التطبيق</h3>
             <div className="grid grid-cols-2 gap-2">
-              {[
-                { icon: '🕌', text: 'مواقيت الصلاة' },
-                { icon: '📖', text: 'القرآن الكريم كاملاً' },
-                { icon: '🎙', text: 'أكثر من 50 قارئاً' },
-                { icon: '📿', text: 'السبحة الإلكترونية' },
-                { icon: '🧭', text: 'تحديد اتجاه القبلة' },
-                { icon: '✨', text: 'الأذكار والأدعية' },
-                { icon: '📚', text: 'تفسير الجلالين' },
-                { icon: '💎', text: 'أسماء الله الحسنى' },
-                { icon: '🔔', text: 'إشعارات الأذان' },
-                { icon: '🌙', text: 'الوضع الليلي' },
-              ].map((f, i) => (
-                <div key={i} className="flex items-center gap-2 bg-secondary/40 rounded-xl px-3 py-2">
-                  <span className="text-base">{f.icon}</span>
-                  <span className="text-xs text-foreground/80" style={{ fontFamily: '"Tajawal", sans-serif' }}>{f.text}</span>
-                </div>
-              ))}
+              <FeatureChip Icon={MosqueIcon}       color="text-primary"       text="مواقيت الصلاة" />
+              <FeatureChip Icon={QuranBookIcon}    color="text-emerald-600"   text="القرآن الكريم كاملاً" />
+              <FeatureChip Icon={HeadphonesIcon}   color="text-purple-500"    text="أكثر من 50 قارئاً" />
+              <FeatureChip Icon={TasbihIcon}       color="text-amber-600"     text="السبحة الإلكترونية" />
+              <FeatureChip Icon={SmartReaderIcon}  color="text-amber-500"     text="قارئ التدبر الذكي" />
+              <FeatureChip Icon={DuaHandsIcon}     color="text-teal-500"      text="الأذكار والأدعية" />
+              <FeatureChip Icon={ScrollIcon}       color="text-orange-500"    text="تفسير الجلالين" />
+              <FeatureChip Icon={IslamicStarIcon}  color="text-emerald-500"   text="أسماء الله الحسنى" />
+              <FeatureChip Icon={BellIcon}         color="text-blue-500"      text="إشعارات الأذان" />
+              <FeatureChip Icon={MoonIcon}         color="text-slate-500"     text="الوضع الليلي" />
             </div>
           </div>
 
           <div className="border-t border-border/30 pt-3 space-y-1">
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>مصادر البيانات</span>
-              <span className="text-foreground/70 text-left text-[11px]" style={{ fontFamily: '"Tajawal", sans-serif' }}>aladhan.com • alquran.cloud • quran.com</span>
+              <span className="text-foreground/70 text-left text-[11px]" style={{ fontFamily: '"Tajawal", sans-serif' }}>aladhan.com • alquran.cloud</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-muted-foreground" style={{ fontFamily: '"Tajawal", sans-serif' }}>الأذان</span>

@@ -1,13 +1,19 @@
 import { Link, useLocation } from "wouter";
-import { Home, BookOpen, Heart, Activity, Menu } from "lucide-react";
+import { Home, BookOpen, Heart, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TasbihIcon } from "@/components/NoorIcons";
 
-const NAV_ITEMS = [
-  { id: "home", path: "/", icon: Home, label: "الرئيسية" },
-  { id: "quran", path: "/quran", icon: BookOpen, label: "القرآن" },
-  { id: "azkar", path: "/azkar", icon: Heart, label: "الأذكار" },
-  { id: "tasbih", path: "/tasbih", icon: Activity, label: "التسبيح" },
-  { id: "more", path: "/more", icon: Menu, label: "المزيد" },
+const NAV_ITEMS: {
+  id: string;
+  path: string;
+  Icon: React.ComponentType<{ className?: string; size?: number; strokeWidth?: number }>;
+  label: string;
+}[] = [
+  { id: "home",   path: "/",       Icon: Home,       label: "الرئيسية" },
+  { id: "quran",  path: "/quran",  Icon: BookOpen,   label: "القرآن"   },
+  { id: "azkar",  path: "/azkar",  Icon: Heart,      label: "الأذكار"  },
+  { id: "tasbih", path: "/tasbih", Icon: TasbihIcon, label: "التسبيح"  },
+  { id: "more",   path: "/more",   Icon: Menu,       label: "المزيد"   },
 ];
 
 export function BottomNav() {
@@ -18,7 +24,7 @@ export function BottomNav() {
       <div className="flex items-center justify-around px-2 h-16">
         {NAV_ITEMS.map((item) => {
           const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
-          const Icon = item.icon;
+          const Icon = item.Icon;
           return (
             <Link key={item.id} href={item.path} className="flex-1 h-full">
               <div
@@ -34,10 +40,8 @@ export function BottomNav() {
                   )}
                 >
                   <Icon
-                    className={cn(
-                      "w-5 h-5 transition-transform duration-300",
-                      isActive ? "scale-110" : "scale-100"
-                    )}
+                    className={cn("w-5 h-5 transition-transform duration-300", isActive ? "scale-110" : "scale-100")}
+                    size={20}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
                 </div>

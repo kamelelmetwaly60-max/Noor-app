@@ -65,7 +65,6 @@ import { Quran } from "@/pages/Quran";
 import { Azkar } from "@/pages/Azkar";
 import { Tasbih } from "@/pages/Tasbih";
 import { MoreMenu } from "@/pages/MoreMenu";
-import { Qibla } from "@/pages/Qibla";
 import { Asma } from "@/pages/Asma";
 import { Reciters } from "@/pages/Reciters";
 import { SpeedReader } from "@/pages/SpeedReader";
@@ -111,9 +110,6 @@ function Router() {
         <AppShell><MoreMenu /></AppShell>
       </Route>
 
-      <Route path="/qibla">
-        <FullScreenShell><Qibla /></FullScreenShell>
-      </Route>
       <Route path="/asma">
         <FullScreenShell><Asma /></FullScreenShell>
       </Route>

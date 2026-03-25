@@ -4,15 +4,24 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import { getTodayKey, cn } from '@/lib/utils';
 import { Check, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MorningIcon, EveningIcon, SleepIcon, DuaHandsIcon, SupplicationIcon } from '@/components/NoorIcons';
 
 type TabId = 'morning' | 'evening' | 'sleep' | 'after' | 'various';
 
+const TAB_ICONS: Record<TabId, React.ComponentType<{ className?: string; size?: number }>> = {
+  morning: MorningIcon,
+  evening: EveningIcon,
+  sleep:   SleepIcon,
+  after:   DuaHandsIcon,
+  various: SupplicationIcon,
+};
+
 const TABS = [
-  { id: 'morning' as TabId,  label: 'الصباح',    arabicIcon: '☀',  data: MORNING_AZKAR },
-  { id: 'evening' as TabId,  label: 'المساء',    arabicIcon: '🌙', data: EVENING_AZKAR },
-  { id: 'sleep' as TabId,    label: 'النوم',      arabicIcon: '✦',  data: AZKAR_SLEEP },
-  { id: 'after' as TabId,    label: 'بعد الصلاة', arabicIcon: '۞',  data: AZKAR_AFTER_PRAYER },
-  { id: 'various' as TabId,  label: 'أدعية',      arabicIcon: '❧',  data: AZKAR_VARIOUS },
+  { id: 'morning' as TabId,  label: 'الصباح',    data: MORNING_AZKAR },
+  { id: 'evening' as TabId,  label: 'المساء',    data: EVENING_AZKAR },
+  { id: 'sleep' as TabId,    label: 'النوم',      data: AZKAR_SLEEP },
+  { id: 'after' as TabId,    label: 'بعد الصلاة', data: AZKAR_AFTER_PRAYER },
+  { id: 'various' as TabId,  label: 'أدعية',      data: AZKAR_VARIOUS },
 ];
 
 function IslamicOrnament({ className = '' }: { className?: string }) {
@@ -175,7 +184,7 @@ export function Azkar() {
                   : 'bg-card text-muted-foreground border-border hover:bg-secondary'
               )}
             >
-              <span className="text-base leading-none">{t.arabicIcon}</span>
+              {(() => { const Icon = TAB_ICONS[t.id]; return <Icon size={16} />; })()}
               <span style={{ fontFamily: '"Tajawal", sans-serif' }}>{t.label}</span>
               {done > 0 && !isActive && (
                 <span className="bg-green-500 text-white text-[9px] px-1 rounded-full">{done}</span>
