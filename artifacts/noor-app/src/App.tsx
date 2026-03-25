@@ -20,7 +20,6 @@ import { Asma } from "@/pages/Asma";
 import { Reciters } from "@/pages/Reciters";
 import { SpeedReader } from "@/pages/SpeedReader";
 import { Adhan } from "@/pages/Adhan";
-import { MosquesFinder } from "@/pages/MosquesFinder";
 import { EgyptianRadio } from "@/pages/EgyptianRadio";
 import { Qibla } from "@/pages/Qibla";
 
@@ -74,9 +73,6 @@ function Router() {
       </Route>
       <Route path="/adhan">
         <FullScreenShell><Adhan /></FullScreenShell>
-      </Route>
-      <Route path="/mosques">
-        <FullScreenShell><MosquesFinder /></FullScreenShell>
       </Route>
       <Route path="/radio">
         <FullScreenShell><EgyptianRadio /></FullScreenShell>
