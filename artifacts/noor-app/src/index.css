@@ -84,6 +84,7 @@
     background-blend-mode: multiply;
     background-size: 300px;
     background-attachment: fixed;
+    overscroll-behavior-y: contain;
   }
   
   .dark body {
